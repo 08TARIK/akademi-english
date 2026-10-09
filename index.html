@@ -15492,12 +15492,17 @@ setInterval(updateChips,60000);
   window.academyHesap={hazir,oturum:()=>S,senkron,gonder,cek,giris:girisPenceresi,cikis,hesapSil,cfg,kitaplikYukle,kitaplikDurumu};
   /* e-postadaki bağlantıyla gelindiyse (şifre sıfırlama / hesap onayı): adres çubuğundaki #access_token=… ile oturum aç */
   async function baglantiGirisi(){
-    const H=new URLSearchParams((location.hash||"").replace(/^#/,"")); const at=H.get("access_token"), rt=H.get("refresh_token"), tip=H.get("type");
-    if(!at||!rt||!hazir()) return false;
-    try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){}
-    try{ const c=cfg(); const r=await fetch(c.url+"/auth/v1/user",{headers:{apikey:c.key,Authorization:"Bearer "+at}});
-      if(!r.ok) throw new Error("Bağlantının süresi dolmuş; yenisini iste");
-      oturumAl({access_token:at,refresh_token:rt,expires_in:+(H.get("expires_in")||3600),user:await r.json()});
+    const H=new URLSearchParams((location.hash||"").replace(/^#/,"")), Q=new URLSearchParams(location.search);
+    const at=H.get("access_token"), rt=H.get("refresh_token"), th=Q.get("token_hash")||H.get("token_hash"), hata=H.get("error_description")||Q.get("error_description");
+    const tip=H.get("type")||Q.get("type");
+    if(!hazir()||!(at&&rt||th||hata)) return false;
+    try{ history.replaceState(null,"",location.pathname); }catch(e){}
+    if(hata){ toast(/expired|invalid/i.test(hata)?"Bağlantının süresi dolmuş ya da kullanılmış — yeni bir e-posta iste.":hata,{kind:"err"}); return false; }
+    try{
+      if(th){ oturumAl(await istek("/auth/v1/verify",{method:"POST",auth:false,body:{type:tip||"recovery",token_hash:th}})); }
+      else { const c=cfg(); const r=await fetch(c.url+"/auth/v1/user",{headers:{apikey:c.key,Authorization:"Bearer "+at}});
+        if(!r.ok) throw new Error("Bağlantının süresi dolmuş; yenisini iste");
+        oturumAl({access_token:at,refresh_token:rt,expires_in:+(H.get("expires_in")||3600),user:await r.json()}); }
       if(tip==="recovery"&&window.askForm){
         const v=await askForm({title:"Yeni şifre belirle",ok:"Şifreyi kaydet",fields:[{id:"p",label:"Yeni şifre",type:"password",required:true,placeholder:"en az 6 karakter"}]});
         if(v&&v.p){ if(v.p.length<6) toast("Şifre en az 6 karakter olmalı; Profil'den tekrar dene",{kind:"err"});
