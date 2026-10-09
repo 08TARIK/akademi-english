@@ -14889,7 +14889,7 @@ function openBackup(){
     const when=o._yedek&&o._yedek.tarih?o._yedek.tarih.slice(0,10):"tarihsiz";
     m.close();
     if(!await askConfirm({title:"Yedekten geri yüklensin mi?",msg:`${when} tarihli yedek, şu anki ilerlemenin yerine geçecek. Bu işlem geri alınamaz.`,ok:"Evet, geri yükle",danger:true})) return;
-    delete o._yedek;
+    delete o._yedek; o._savedAt=Date.now();   // geri yüklenen ilerleme en yeni sayılsın: hesap senkronu buluttakiyle ezmesin, buluta yazsın
     try{ localStorage.setItem("academy_v2",JSON.stringify(o)); }catch(e){ acToast("Tarayıcı hafızasına yazılamadı: "+e.message,{kind:"err"}); return; }
     acToast("Yedek yüklendi, sayfa yenileniyor…",{kind:"ok"}); setTimeout(()=>{ try{ location.reload(); }catch(e){ acToast("Sayfayı yenile, yedeğin hazır.",{kind:"info"}); } },700);
   };
