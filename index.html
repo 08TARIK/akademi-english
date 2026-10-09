@@ -15335,7 +15335,9 @@ setInterval(updateChips,60000);
     try{ await sifreGiris(email,pw); return true; }catch(e){}
     throw new Error("Hesap oluşturuldu ama onay e-postası bekleniyor. E-postandaki bağlantıyı aç ya da yöneticiye haber ver.");
   }
-  async function sifreSifirla(email){ await istek("/auth/v1/recover",{method:"POST",auth:false,body:{email}}); }
+  /* e-postadaki bağlantı bu sayfaya dönsün (Supabase'te Site URL yanlışsa bile; adres "Redirect URLs" listesinde olmalı) */
+  async function sifreSifirla(email){ const geri=encodeURIComponent(location.origin+location.pathname);
+    await istek("/auth/v1/recover?redirect_to="+geri,{method:"POST",auth:false,body:{email}}); }
   const hataTR=m=>/invalid login|invalid_credentials|invalid grant/i.test(m)?"E-posta ya da şifre hatalı.":/already registered|already been registered|user_already_exists/i.test(m)?"Bu e-postayla zaten bir hesap var — Giriş sekmesini kullan.":
     /password.*(6|characters|short)|weak_password/i.test(m)?"Şifre en az 6 karakter olmalı.":/rate limit|too many/i.test(m)?"Çok fazla deneme; birkaç dakika sonra tekrar dene.":
     /signup.*disabled|signups not allowed/i.test(m)?"Yeni hesap açma şu an kapalı — yöneticiye haber ver.":m;
