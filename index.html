@@ -5180,7 +5180,7 @@ RENDERERS.prof=function(){
       </table></div></div>
   <div class="card"><h3 style="margin-bottom:8px">Veri Yönetimi</h3>
     <p class="hint" style="margin-bottom:12px">İlerlemen bu tarayıcıda saklanır. Yedek için dışa aktar.</p>
-    <div class="row"><button class="btn ghost" id="dJ">⤓ Verileri dışa aktar (JSON)</button>
+    <div class="row"><button class="btn ghost" id="dJ">⤓ Verileri dışa aktar (JSON)</button>${window.vaultGorunur&&vaultGorunur()?`<button class="btn ghost" id="dV">➜ Vault'a gönder</button>`:""}
       <button class="btn ghost" id="dC">⤓ Kelime listesi (CSV)</button>
       <button class="btn red" id="dR">Tüm ilerlemeyi sıfırla</button></div></div>`;
   document.getElementById("pSave").onclick=()=>{
@@ -5192,6 +5192,7 @@ RENDERERS.prof=function(){
     saveState(); alert("Kaydedildi."); RENDERERS.prof();};
   document.getElementById("dC").onclick=exportCsv;
   document.getElementById("dJ").onclick=()=>openBackup();
+  if(document.getElementById("dV")) document.getElementById("dV").onclick=()=>vaultGonder();
   document.getElementById("dR").onclick=async()=>{ if(await askConfirm({title:"Tüm ilerleme silinsin mi?",msg:"Kelimeler, sınav geçmişi, takvim, XP ve arayüz ayarların dahil her şey kalıcı olarak silinir. Öncesinde bir yedek almanı öneririm.",ok:"Evet, her şeyi sil",danger:true})){
     localStorage.removeItem("academy_v2"); STATE=structuredClone(DEFAULT_STATE); ensureDaily(); if(window.acApplyLook) acApplyLook(); RENDERERS.prof(); acToast("İlerleme sıfırlandı",{kind:"ok"}); }};
 };
@@ -14813,7 +14814,7 @@ function openSettings(){
    <div class="srow"><span>Günlük hedef<small>takvim ve dashboard ölçeklenir</small></span>${seg("goal",[["30","30 dk"],["45","45 dk"],["60","60 dk"],["90","90 dk"],["120","120 dk"]],STATE.profile.dailyMinutes||60)}</div>
    <div class="srow" style="align-items:flex-start"><span>Paneller<small>kapalı olanlar sidebar'dan kalkar, ⌘K ile yine açılır</small></span><div class="ac-plist">${$$("#rail .nav").map(n=>{ const p=n.dataset.p, lk=LOCKED.includes(p);
       return `<label class="${lk?"lock":""}"><input type="checkbox" data-hp="${p}" ${u.hidden.includes(p)&&!lk?"":"checked"} ${lk?"disabled":""}>${esc(labelOf(p))}</label>`; }).join("")}</div></div>
-   <div class="srow"><span>Diğer</span><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn ghost sm" type="button" data-de>Dashboard düzeni</button><button class="btn ghost sm" type="button" data-bk>Yedek al / geri yükle</button><button class="btn ghost sm" type="button" data-kb>Kısayollar</button></div></div>
+   <div class="srow"><span>Diğer</span><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn ghost sm" type="button" data-de>Dashboard düzeni</button><button class="btn ghost sm" type="button" data-bk>Yedek al / geri yükle</button>${window.vaultGorunur&&vaultGorunur()?`<button class="btn ghost sm" type="button" data-vg>Vault'a gönder</button>`:""}<button class="btn ghost sm" type="button" data-kb>Kısayollar</button></div></div>
    <div class="dend"><button class="btn" type="button" data-x>Tamam</button></div>`;
   const m=openModal(html,{wide:true});
   $$(".seg",m.d).forEach(sg=>sg.onclick=e=>{ const b=e.target.closest("button"); if(!b) return; const k=sg.dataset.seg, v=b.dataset.v;
@@ -14824,6 +14825,7 @@ function openSettings(){
   $$("[data-hp]",m.d).forEach(cb=>cb.onchange=()=>{ const p=cb.dataset.hp; u.hidden=u.hidden.filter(x=>x!==p); if(!cb.checked) u.hidden.push(p); saveState(); syncRail(); });
   $("[data-de]",m.d).onclick=()=>{ m.close(); openDashEditor(); };
   $("[data-bk]",m.d).onclick=()=>{ m.close(); openBackup(); };
+  if($("[data-vg]",m.d)) $("[data-vg]",m.d).onclick=()=>{ vaultGonder(); };   // seçici kullanıcı hareketi ister: pencere açık kalsın
   $("[data-kb]",m.d).onclick=()=>{ m.close(); openShortcuts(); };
   $("[data-x]",m.d).onclick=()=>m.close();
 }
@@ -14927,6 +14929,7 @@ function commands(){
     ["Arayüz ayarları",openSettings,"gear","settings yogunluk vurgu yazi boyutu"],
     ["Dashboard'u düzenle",openDashEditor,"layout","kart sirala"],
     ["Yedek al / geri yükle",openBackup,"save","backup export import json"],
+    ...(window.vaultGorunur&&vaultGorunur()?[["Vault'a gönder",()=>vaultGonder(),"save","vault obsidian notion gonder akademi durum"]]:[]),
     ["Klavye kısayolları",openShortcuts,"key","shortcuts","?"],
     [u.sound?"Sesleri kapat":"Sesleri aç",()=>{u.sound=!u.sound;saveState(); if(u.sound) sfx("ok"); acToast(u.sound?"Sesler açık":"Sesler kapalı",{kind:"ok",ms:1400});},"speak","ses sound"],
     ...(U().resume||exam2?[["Yarım kalan sınava dön",resumeExam,"exam","devam resume"]]:[]),
@@ -16322,6 +16325,95 @@ document.addEventListener("click",e=>{
   const U=window.ULT;
   if(U&&Array.isArray(U.TOOLS)){ for(let i=U.TOOLS.length-1;i>=0;i--) if(U.TOOLS[i].k==="sync"||U.TOOLS[i].k==="saas") U.TOOLS.splice(i,1);
     try{ const X=U.X(); if(X.tab==="sync"||X.tab==="saas") X.tab=(U.TOOLS[0]||{}).k; }catch(e){} }
+})();
+</script>
+<script>
+/* ============================================================
+   VAULT'A GÖNDER — ilerleme durumunu Obsidian vault'una (raw/English/Academy Yedek/akademi-durum-YYYY-AA-GG.json) bırakır.
+   Vault tarafı (~/.my-brain/ingilizce/akademi_al.py) klasörü izler; burası yalnız dosyayı yazar.
+   Yol 1 (masaüstü Chrome/Edge): File System Access API — klasör bir kez seçilir, tutamaç IndexedDB'de saklanır;
+     sonraki gönderimler doğrudan o dosyaya yazar (aynı gün üzerine yazılır). İzin verilmişse sekme gizlenirken ve her gün ilk açılışta sessizce güncellenir.
+   Yol 2 (Safari / iOS / claude.ai önizleme): normal indirme + toast.
+   Yalnız kitap sahibi için görünür (kitaplık yüklüyse). Dosyaya e-posta/şifre/token, koç sohbeti, yapıştırılan metin ve kitap içeriği girmez.
+   ============================================================ */
+(function(){
+  const LS_SON="academy_vault_son", DBAD="academy-vault", DEPO="h", ANAHTAR="dir";
+  const p2=n=>String(n).padStart(2,"0");
+  const yerelGun=(d)=>{ d=d||new Date(); return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate()); };
+  const yerelSaat=(d)=>yerelGun(d)+" "+p2(d.getHours())+":"+p2(d.getMinutes());
+  const E=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const toast=(m,o)=>window.acToast?acToast(m,o):console.log(m);
+  const gorunur=()=>typeof KITAP_BOOKS!=="undefined"&&KITAP_BOOKS.length>0;
+  const idbAc=()=>new Promise((res,rej)=>{ try{ const r=indexedDB.open(DBAD,1); r.onupgradeneeded=()=>r.result.createObjectStore(DEPO); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }catch(e){ rej(e); } });
+  const idbAl=async()=>{ try{ const db=await idbAc(); return await new Promise(res=>{ const q=db.transaction(DEPO).objectStore(DEPO).get(ANAHTAR); q.onsuccess=()=>res(q.result||null); q.onerror=()=>res(null); }); }catch(e){ return null; } };
+  const idbKoy=async h=>{ try{ const db=await idbAc(); await new Promise((res,rej)=>{ const t=db.transaction(DEPO,"readwrite"); t.objectStore(DEPO).put(h,ANAHTAR); t.oncomplete=res; t.onerror=()=>rej(t.error); }); return true; }catch(e){ return false; } };
+  const son=()=>{ try{ return JSON.parse(localStorage.getItem(LS_SON)||"null"); }catch(e){ return null; } };
+  const sonYaz=yol=>{ try{ localStorage.setItem(LS_SON,JSON.stringify({t:Date.now(),gun:yerelGun(),yol})); }catch(e){} };
+
+  /* gönderilecek veri: yalnız bu hesabın STATE'i; hassas anahtarlar, sohbet/yapıştırılmış metin ve arayüz tercihleri çıkarılır */
+  function vaultVeri(){
+    const o=JSON.parse(JSON.stringify(STATE));
+    ["coachLog","coachThread","coachSaved","pastedLessons","clips","ui","ult","recentSearch","aiTopics"].forEach(k=>delete o[k]);
+    const yasak=/token|passw|secret|api.?key|e-?mail|authorization|cookie/i;
+    (function t(x,d){ if(!x||typeof x!=="object"||d>8) return;
+      for(const k of Object.keys(x)){ if(yasak.test(k)){ delete x[k]; continue; } const v=x[k];
+        if(typeof v==="string"&&v.length>400) x[k]=v.slice(0,400); else t(v,d+1); } })(o,0);
+    return JSON.stringify(Object.assign({_yedek:{uygulama:"academy_v2",tarih:new Date().toISOString(),kaynak:"vault-gonder"}},o),null,1);
+  }
+  const izinli=async(h,iste)=>{ try{ const o={mode:"readwrite"}; if((await h.queryPermission(o))==="granted") return true; if(!iste) return false; return (await h.requestPermission(o))==="granted"; }catch(e){ return false; } };
+  async function dosyaYaz(dir,ad,metin){ const fh=await dir.getFileHandle(ad,{create:true}); const w=await fh.createWritable(); await w.write(metin); await w.close(); }
+  function indir(ad,metin){ const u=URL.createObjectURL(new Blob([metin],{type:"application/json"})); const a=document.createElement("a"); a.href=u; a.download=ad; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),5000); }
+
+  let calisiyor=false;
+  /* o.sessiz: izin soruları ve bildirimler olmadan yalnız doğrudan yazmayı dener (otomatik güncelleme) */
+  async function vaultGonder(o){
+    o=o||{}; if(calisiyor) return false; calisiyor=true;
+    try{
+      if(STATE.profile&&STATE.profile.onboarded===false) return false;
+      const ad=`akademi-durum-${yerelGun()}.json`, metin=vaultVeri();
+      let h=await idbAl();
+      if(h&&!(await izinli(h,!o.sessiz))) h=null;
+      if(o.sessiz){ if(!h) return false;
+        try{ await dosyaYaz(h,ad,metin); sonYaz("klasor"); return true; }catch(e){ return false; } }
+      if(!h&&typeof window.showDirectoryPicker==="function"){
+        toast("Obsidian → My Brain → raw → English → Academy Yedek klasörünü seç",{kind:"info",ms:7000});
+        try{ h=await window.showDirectoryPicker({id:"akademi-vault",mode:"readwrite"}); await idbKoy(h); }
+        catch(e){ if(e&&e.name==="AbortError"){ toast("Klasör seçilmedi",{kind:"info"}); return false; } h=null; }   // iframe/izin engeli → indirme yoluna düş
+      }
+      if(h){
+        try{ await dosyaYaz(h,ad,metin); sonYaz("klasor"); toast(`Vault'a yazıldı: ${h.name}/${ad}`,{kind:"ok",ms:5000}); yenile(); return true; }
+        catch(e){ toast("Klasöre yazılamadı: "+(e&&e.message||e)+" — dosya indirilecek",{kind:"err"}); }
+      }
+      if(typeof DL!=="undefined"&&DL&&window.acSaveFile){ if(await acSaveFile(ad,metin,"Vault dosyası")) toast("Dosyayı Obsidian → raw/English/Academy Yedek klasörüne at",{kind:"info",ms:7000}); }
+      else { indir(ad,metin); toast("Dosya indirildi — Obsidian → raw/English/Academy Yedek klasörüne at",{kind:"info",ms:7000}); }
+      sonYaz("indirme"); yenile(); return true;
+    }finally{ calisiyor=false; }
+  }
+  window.vaultGonder=vaultGonder; window.vaultGorunur=gorunur; window.vaultVeri=vaultVeri;
+
+  /* otomatik: sekme gizlenirken ve her gün ilk açılışta, yalnız klasör seçilmiş + izin sürüyorsa */
+  let sonOto=0;
+  const oto=async()=>{ if(Date.now()-sonOto<180000) return; if(!(await idbAl())) return; sonOto=Date.now(); try{ if(await vaultGonder({sessiz:true})) yenile(); }catch(e){} };
+  document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden") oto(); });
+  window.addEventListener("pagehide",oto);
+  setTimeout(()=>{ const s=son(); if(!s||s.gun!==yerelGun()) oto(); },5000);
+
+  /* Profile → Hesap & Bulut kartında durum satırı */
+  function yenile(){ const on=document.getElementById("p-prof"); if(on&&on.classList.contains("on")) try{ RENDERERS.prof(); }catch(e){} }
+  const _pr=RENDERERS.prof;
+  RENDERERS.prof=function(){
+    _pr.apply(this,arguments);
+    if(!gorunur()) return;
+    const kart=document.getElementById("hbKart"); if(!kart||document.getElementById("vgSatir")) return;
+    const d=document.createElement("div"); d.id="vgSatir"; d.style.cssText="margin-top:14px;padding-top:12px;border-top:1px solid var(--edge)";
+    const s=son();
+    d.innerHTML=`<div class="row" style="justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center"><div><b>Obsidian vault</b>
+      <div class="hint" id="vgDurum">Son gönderim: ${s?E(yerelSaat(new Date(s.t)))+(s.yol==="klasor"?" (doğrudan klasöre)":" (dosya indirildi)"):"henüz yok"}</div></div>
+      <button class="btn ghost sm" type="button" id="vgBtn">Vault'a gönder</button></div>`;
+    kart.appendChild(d);
+    d.querySelector("#vgBtn").onclick=()=>vaultGonder();
+    idbAl().then(h=>{ const el=document.getElementById("vgDurum"); if(el&&h) el.textContent+=` · otomatik güncelleme açık (klasör: ${h.name})`; });
+  };
 })();
 </script>
 
