@@ -3568,8 +3568,10 @@ function planDay(n){ // n = 1..PLAN_LEN()
 /* ============================================================
    STATE · SRS · NAV · TTS · WORD POPUP
    ============================================================ */
-const todayISO = ()=> new Date().toISOString().slice(0,10);
-function addDays(iso,n){ const d=new Date(iso); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
+/* Tarihler cihazın YEREL gününe göre (önceden UTC idi: Türkiye'de 00:00–03:00 arası hâlâ "dün" görünüyordu) */
+const isoLocal = d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const todayISO = ()=> isoLocal(new Date());
+function addDays(iso,n){ const d=new Date(String(iso).slice(0,10)+"T00:00:00Z"); d.setUTCDate(d.getUTCDate()+n); return d.toISOString().slice(0,10); }
 function daysSince(iso){ return Math.floor((new Date(todayISO()) - new Date(iso))/86400000); }
 
 const DEFAULT_STATE = {
@@ -3798,9 +3800,22 @@ function recordAnswer(qd,ok,pfx){
   saveState();
   const pw=document.getElementById("pipWeak"); if(pw) pw.textContent=STATE.mistakes.length;
 }
+/* Cevaplar kalıcı: Reading/Listening/Grammar gibi sabit kimlikli (read12, listen5, gram<id>, kg…) soru setlerinde verdiğin cevaplar
+   STATE.qAnswers[pfx][i]={s,ok,t} olarak saklanır ve sayfaya dönünce aynen gösterilir (puan/XP tekrar sayılmaz). "Yeniden çöz" ile silinir. */
+const QKEEP=/^(read|listen)\d+$|^gram[A-Za-z0-9]+$|^kg.+/;
 function renderQuestions(container,questions,pfx){
   container.innerHTML="";
+  const keep=QKEEP.test(String(pfx)), saved=keep?((STATE.qAnswers||{})[pfx]||[]):[];
+  let replaying=false;
+  const save=(i,sel,ok)=>{ if(!keep||replaying) return; STATE.qAnswers=STATE.qAnswers||{}; const a=STATE.qAnswers[pfx]=STATE.qAnswers[pfx]||[]; a[i]={s:sel,ok:!!ok,t:Date.now()}; saveState(); };
+  const gecmis=saved.filter(Boolean);
+  if(gecmis.length){ const b=document.createElement("div"); b.className="hint"; b.style.cssText="margin:0 0 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap";
+    const dogru=gecmis.filter(x=>x.ok).length;
+    b.innerHTML=`<span>Önceki cevapların gösteriliyor · <b>${dogru}/${gecmis.length}</b> doğru · ${new Date(Math.max(...gecmis.map(x=>x.t||0))).toLocaleDateString("tr-TR")}</span><button class="btn ghost sm" type="button">Yeniden çöz</button>`;
+    b.querySelector("button").onclick=()=>{ delete STATE.qAnswers[pfx]; saveState(); renderQuestions(container,questions,pfx); };
+    container.appendChild(b); }
   questions.forEach((qd,i)=>{
+    let pending=null;
     const wrap=document.createElement("div"); wrap.className="q";
     const lbl={mc:"Çoktan Seçmeli",tf:"Doğru / Yanlış",gap:"Boşluk Doldurma",head:"Matching Heading",open:"Açık Uçlu",note:"Note Completion"}[qd.t]||qd.t;
     wrap.innerHTML=`<div class="qh"><span class="qn">${i+1}</span><span class="qt">${qd.q}</span><span class="qtype">${lbl}</span></div><div class="body"></div><div class="fb" id="${pfx}-fb-${i}"></div>`;
@@ -3815,13 +3830,14 @@ function renderQuestions(container,questions,pfx){
           opts.querySelectorAll(".opt").forEach(x=>x.style.pointerEvents="none");
           const ok=oi===qd.a; o.classList.add(ok?"right":"wrong");
           if(!ok) opts.children[qd.a].classList.add("right");
-          recordAnswer(qd,ok,pfx);
+          if(!replaying) recordAnswer(qd,ok,pfx); save(i,oi,ok);
           const fb=fbEl(); fb.className="fb on "+(ok?"good":"bad");
           fb.innerHTML=`<b>${ok?"✓ Doğru!":"✗ Yanlış — doğru cevap: "+String.fromCharCode(65+qd.a)+") "+qd.o[qd.a]}</b><span class="why">${qd.why||""}</span>${qd.trap&&!ok?`<div class="why" style="margin-top:6px"><b>Tuzak:</b> ${qd.trap}</div>`:""}`;
         };
         opts.appendChild(o);
       });
       body.appendChild(opts);
+      if(saved[i]&&saved[i].s!=null&&opts.children[saved[i].s]) pending=()=>opts.children[saved[i].s].click();
     } else if(qd.t==="tf"){
       const opts=document.createElement("div"); opts.className="opts";
       const three = qd.a==="NG" || questions.some(x=>x.a==="NG");
@@ -3833,13 +3849,14 @@ function renderQuestions(container,questions,pfx){
           opts.querySelectorAll(".opt").forEach(x=>x.style.pointerEvents="none");
           const ok=codes[oi]===qd.a; o.classList.add(ok?"right":"wrong");
           if(!ok){ const ci=codes.indexOf(qd.a); if(opts.children[ci]) opts.children[ci].classList.add("right"); }
-          recordAnswer(qd,ok,pfx);
+          if(!replaying) recordAnswer(qd,ok,pfx); save(i,codes[oi],ok);
           const fb=fbEl(); fb.className="fb on "+(ok?"good":"bad");
           fb.innerHTML=`<b>${ok?"✓ Doğru!":"✗ Yanlış — doğru cevap: "+({T:"TRUE",F:"FALSE",NG:"NOT GIVEN"}[qd.a])}</b><span class="why">${qd.why||""}</span>`;
         };
         opts.appendChild(o);
       });
       body.appendChild(opts);
+      if(saved[i]&&saved[i].s!=null&&codes.indexOf(saved[i].s)>-1) pending=()=>opts.children[codes.indexOf(saved[i].s)].click();
     } else if(qd.t==="gap"){
       const row=document.createElement("div"); row.style.cssText="margin-left:21px;display:flex;gap:8px;align-items:center;flex-wrap:wrap";
       const inp=document.createElement("input"); inp.type="text"; inp.style.width="220px"; inp.placeholder="cevabını yaz...";
@@ -3851,21 +3868,24 @@ function renderQuestions(container,questions,pfx){
         const acc=(Array.isArray(qd.a)?qd.a:[qd.a]).concat(qd.alt||[]).map(x=>String(x).toLowerCase());
         const ok=acc.map(gnorm).includes(val);
         inp.style.borderColor=ok?"var(--green)":"var(--red)"; inp.disabled=true; btn.disabled=true;
-        recordAnswer(qd,ok,pfx);
+        if(!replaying) recordAnswer(qd,ok,pfx); save(i,inp.value,ok);
         const fb=fbEl(); fb.className="fb on "+(ok?"good":"bad");
         fb.innerHTML=`<b>${ok?"✓ Doğru!":"✗ Yanlış — doğru cevap: "+acc[0]}</b><span class="why">${qd.why||""}</span>`;
       };
       inp.addEventListener("keydown",e=>{ if(e.key==="Enter") btn.click(); });
       row.append(inp,btn); body.appendChild(row);
+      if(saved[i]&&saved[i].s!=null) pending=()=>{ inp.value=saved[i].s; btn.click(); };
     } else {
       const row=document.createElement("div"); row.style.marginLeft="21px";
       const ta=document.createElement("textarea"); ta.rows=3; ta.placeholder="cevabını yaz...";
       const btn=document.createElement("button"); btn.className="btn sm"; btn.style.marginTop="6px"; btn.textContent="Model cevabı göster";
-      btn.onclick=()=>{ const fb=fbEl(); fb.className="fb on good";
+      btn.onclick=()=>{ const fb=fbEl(); fb.className="fb on good"; save(i,ta.value,true); ta.readOnly=true;
         fb.innerHTML=`<b>Model cevap</b><span class="why">${Array.isArray(qd.a)?qd.a[0]:qd.a}</span><div class="why" style="margin-top:6px"><b>Neden:</b> ${qd.why||""}</div>`; };
       row.append(ta,document.createElement("br"),btn); body.appendChild(row);
+      if(saved[i]&&saved[i].s!=null) pending=()=>{ ta.value=saved[i].s; btn.click(); };
     }
     container.appendChild(wrap);
+    if(pending){ replaying=true; try{ pending(); }catch(e){ console.error(e); } finally{ replaying=false; } }
   });
 }
 function allGrammarQuestions(){
@@ -5214,7 +5234,7 @@ const pip=document.getElementById("pipSrs"); if(pip) pip.textContent=srsQueue().
 const TR_MONTHS=["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
 const TR_DAYS=["Pzt","Sal","Çar","Per","Cum","Cmt","Paz"];
 function dateOfDay(n){ return addDays(STATE.profile.start, n-1); }      // program günü → gerçek tarih
-function fmtTR(iso){ const d=new Date(iso); return `${d.getDate()} ${TR_MONTHS[d.getMonth()]} ${d.getFullYear()}`; }
+function fmtTR(iso){ const d=new Date(String(iso).slice(0,10)+"T12:00:00"); return `${d.getDate()} ${TR_MONTHS[d.getMonth()]} ${d.getFullYear()}`; }
 function dayIndex(){ return Math.floor(new Date(todayISO()).getTime()/86400000); }  // günlük rotasyon anahtarı
 function rotate(arr,k){ if(!arr.length)return arr; const i=((k%arr.length)+arr.length)%arr.length; return arr.slice(i).concat(arr.slice(0,i)); }
 
@@ -5242,7 +5262,7 @@ RENDERERS.plan=function(){
   // build month-by-month from the real start date
   const months=[]; let cur=null;
   for(let n=1;n<=PLAN_LEN();n++){
-    const iso=dateOfDay(n), d=new Date(iso), key=d.getFullYear()+"-"+d.getMonth();
+    const iso=dateOfDay(n), d=new Date(iso+"T12:00:00"), key=d.getFullYear()+"-"+d.getMonth();
     if(!cur||cur.key!==key){ cur={key,y:d.getFullYear(),m:d.getMonth(),days:[]}; months.push(cur); }
     cur.days.push({n,iso,dom:d.getDate(),dow:(d.getDay()+6)%7}); // 0=Pzt
   }
@@ -11063,7 +11083,7 @@ function monthReport(offset){
   const now=new Date(todayISO());
   const y=now.getFullYear(), m=now.getMonth()-(offset||0);
   const from=new Date(y,m,1), to=new Date(y,m+1,0);
-  const iso=d=>d.toISOString().slice(0,10);
+  const iso=isoLocal;
   const inR=d=>d>=iso(from)&&d<=iso(to);
   const q=STATE.quizHistory.filter(h=>inR(h.date)), w=STATE.writingSubs.filter(h=>inR(h.date));
   const s=STATE.speakingSubs.filter(h=>inR(h.date)), ex=STATE.examResults.filter(h=>inR(h.date));
@@ -11959,7 +11979,7 @@ RENDERERS.plan=function(){
   /* aylar */
   const months=[]; let cur=null;
   for(let n=1;n<=PLAN_LEN();n++){
-    const iso=dateOfDay(n), d=new Date(iso), key=d.getFullYear()+"-"+d.getMonth();
+    const iso=dateOfDay(n), d=new Date(iso+"T12:00:00"), key=d.getFullYear()+"-"+d.getMonth();
     if(!cur||cur.key!==key){ cur={key,y:d.getFullYear(),m:d.getMonth(),days:[]}; months.push(cur); }
     cur.days.push({n,iso,dom:d.getDate(),dow:(d.getDay()+6)%7});
   }
@@ -12730,10 +12750,10 @@ U.rwView=function(b,c){
 };
 
 /* ============ 9 · WRITING HATA ISI HARİTASI ============ */
-U.weekKey=iso=>{ const d=new Date(iso); d.setDate(d.getDate()-((d.getDay()+6)%7)); return d.toISOString().slice(0,10); };
+U.weekKey=iso=>{ const d=new Date(String(iso).slice(0,10)+"T00:00:00Z"); d.setUTCDate(d.getUTCDate()-((d.getUTCDay()+6)%7)); return d.toISOString().slice(0,10); };
 window.errorHeatmap=function(){
   const C=U.X().corpus; const weeks=[]; const t=new Date(todayISO());
-  for(let i=7;i>=0;i--){ const d=new Date(t); d.setDate(d.getDate()-i*7); weeks.push(U.weekKey(d.toISOString().slice(0,10))); }
+  for(let i=7;i>=0;i--){ const d=new Date(t); d.setUTCDate(d.getUTCDate()-i*7); weeks.push(U.weekKey(d.toISOString().slice(0,10))); }
   const types=[...new Set(C.flatMap(c=>c.issues.map(i=>i.type)))];
   const wWords={}; C.forEach(c=>{ const k=U.weekKey(c.date); wWords[k]=(wWords[k]||0)+c.words; });
   const grid=types.map(ty=>weeks.map(wk=>{ const n=C.filter(c=>U.weekKey(c.date)===wk).reduce((a,c)=>a+c.issues.filter(i=>i.type===ty).length,0); return {n,per:wWords[wk]?100*n/wWords[wk]:null}; }));
@@ -13029,7 +13049,7 @@ U.tool({k:"planner",g:"kelime",tier:"pro",n:"Akıllı Tekrar Planlayıcı",i:"�
         ${P.days.map((d,i)=>{ let y0=Y(0), s=""; Object.keys(CHN).forEach(k=>{ const n=d.by[k]||0; if(!n) return; const h=(n*COST[k]/60)/mxm*(H-8-PB); s+=`<rect x="${(PL+i*bw+3).toFixed(1)}" y="${(y0-h).toFixed(1)}" width="${(bw-6).toFixed(1)}" height="${h.toFixed(1)}" fill="${CHC[k]}"><title>${d.date} · ${CHN[k]} ${n}</title></rect>`; y0-=h; });
           return s+`<line x1="${(PL+i*bw+2).toFixed(1)}" x2="${(PL+i*bw+bw-2).toFixed(1)}" y1="${Y(d.cap/60).toFixed(1)}" y2="${Y(d.cap/60).toFixed(1)}" stroke="var(--red)" stroke-dasharray="3 2"/>
           ${d.orig!==d.sec?`<rect x="${(PL+i*bw+3).toFixed(1)}" y="${Y(d.orig/60).toFixed(1)}" width="${(bw-6).toFixed(1)}" height="${(Y(0)-Y(d.orig/60)).toFixed(1)}" fill="none" stroke="var(--ink2)" stroke-dasharray="2 2"><title>Planlamadan önce ${Math.round(d.orig/60)} dk</title></rect>`:""}
-          <text x="${(PL+i*bw+bw/2).toFixed(1)}" y="${H-10}" text-anchor="middle" font-size="9" fill="var(--faint)">${i===0?"bugün":DN[(new Date(d.date).getDay()+6)%7]}</text>`; }).join("")}</svg>
+          <text x="${(PL+i*bw+bw/2).toFixed(1)}" y="${H-10}" text-anchor="middle" font-size="9" fill="var(--faint)">${i===0?"bugün":DN[(new Date(d.date+"T12:00:00").getDay()+6)%7]}</text>`; }).join("")}</svg>
       <p class="hint">Kesikli çerçeve: planlamadan önceki yük. ${P.moved} kart yeniden dağıtıldı.</p>
       <div class="ul-row" style="margin-top:10px"><button class="btn" type="button" id="plAp" ${P.moved||P.over?"":"disabled"}>Planı uygula</button><span class="hint">Tarihleri günceller; kartları erken tekrar etmek hafızaya zarar vermez.</span></div></div>
     <div class="card" style="margin-top:16px"><h4>Tekrar için ayırdığın dakikalar</h4><div class="ul-row" style="margin-top:8px">${DN.map((n,i)=>`<label style="display:flex;flex-direction:column;font-size:12px;gap:3px">${n}<input type="number" min="0" max="180" value="${av[i]}" data-a="${i}" style="width:64px"></label>`).join("")}</div>
@@ -14674,7 +14694,7 @@ function chartGrowth(){
   const dated=Object.keys(LA).filter(w=>WS[w]==="learned"), total=typeof learnedCount==="function"?learnedCount():dated.length, base=Math.max(0,total-dated.length);
   if(!total) return emptyChart("Henüz öğrenildi olarak işaretlenmiş kelime yok. Word Library'de kelimeleri işaretledikçe eğri büyür.",["Word Library'ye git","vocab"]);
   const W=12, pts=[]; const today=new Date(todayISO());
-  for(let i=W-1;i>=0;i--){ const d=new Date(today); d.setDate(d.getDate()-i*7); const iso=d.toISOString().slice(0,10);
+  for(let i=W-1;i>=0;i--){ const d=new Date(today); d.setUTCDate(d.getUTCDate()-i*7); const iso=d.toISOString().slice(0,10);
     pts.push({d, v:base+dated.filter(w=>LA[w]<=iso).length}); }
   const TH=[[1000,"A2"],[2000,"B1"],[4000,"B2"],[8000,"C1"]];
   const mx=Math.max(...pts.map(p=>p.v)); const nextT=TH.find(t=>t[0]>mx)||TH[3];
@@ -15463,12 +15483,14 @@ setInterval(updateChips,60000);
       if(STATE.profile.onboarded!==false) await gonder();
     }catch(e){ toast("Senkron: "+e.message,{kind:"err"}); }
     if(document.getElementById("p-prof")&&document.getElementById("p-prof").classList.contains("on")) RENDERERS.prof();
+    try{ if(window.pushSenkron) setTimeout(()=>pushSenkron(),1500); }catch(e){}
     const ob=document.querySelector("#obWrap #obYedek"), obk=ob&&ob.closest(".card");
     if(obk) obk.innerHTML=`<b>✓ Hesabınla giriş yaptın</b><p class="hint" style="margin:4px 0 0">${E(S.user.email||"")} — kurulumu bitirince ilerlemen bu hesaba kaydedilir.</p>`;
     kitaplikYukle();
   }
   async function cikis(){
     if(!(await askConfirm({title:"Çıkış yapılsın mı?",msg:"Bu cihazdaki ilerlemen kalır; yalnız bulut senkronu durur.",ok:"Çıkış yap"}))) return;
+    try{ if(window.pushCik) await pushCik(true); }catch(e){}   // bu cihazın push aboneliği hesaptan ayrılsın
     try{ await istek("/auth/v1/logout",{method:"POST"}); }catch(e){}
     oturumYaz(null); await idb.sil("paket"); toast("Çıkış yapıldı",{kind:"ok"}); RENDERERS.prof();
   }
@@ -15526,7 +15548,7 @@ setInterval(updateChips,60000);
       if(pp) pp.textContent="Hesap oluşturursan ilerlemen hesabına kaydedilir; telefonda ve bilgisayarda aynı hesapla devam edersin. Daha önce hesap açtıysan giriş yap — ilerlemen geri gelir.";
       const bk=document.createElement("button"); bk.className="btn sm"; bk.type="button"; bk.textContent="Hesap oluştur"; bk.onclick=()=>girisPenceresi("kayit"); kutu.before(bk);
       const bt=document.createElement("button"); bt.className="btn ghost sm"; bt.type="button"; bt.textContent="Giriş yap"; bt.onclick=()=>girisPenceresi("giris"); kutu.before(bt); } };
-  window.academyHesap={hazir,oturum:()=>S,senkron,gonder,cek,giris:girisPenceresi,cikis,hesapSil,cfg,kitaplikYukle,kitaplikDurumu};
+  window.academyHesap={hazir,oturum:()=>S,senkron,gonder,cek,giris:girisPenceresi,cikis,hesapSil,cfg,kitaplikYukle,kitaplikDurumu,istek};
   /* e-postadaki bağlantıyla gelindiyse (şifre sıfırlama / hesap onayı): adres çubuğundaki #access_token=… ile oturum aç */
   async function baglantiGirisi(){
     const H=new URLSearchParams((location.hash||"").replace(/^#/,"")), Q=new URLSearchParams(location.search);
@@ -16384,7 +16406,7 @@ document.addEventListener("click",e=>{
   /* gönderilecek veri: yalnız bu hesabın STATE'i; hassas anahtarlar, sohbet/yapıştırılmış metin ve arayüz tercihleri çıkarılır */
   function vaultVeri(){
     const o=JSON.parse(JSON.stringify(STATE));
-    ["coachLog","coachThread","coachSaved","pastedLessons","clips","ui","ult","recentSearch","aiTopics"].forEach(k=>delete o[k]);
+    ["coachLog","coachThread","coachSaved","pastedLessons","clips","ui","ult","recentSearch","aiTopics","uretim","uretimSon"].forEach(k=>delete o[k]);
     const yasak=/token|passw|secret|api.?key|e-?mail|authorization|cookie/i;
     (function t(x,d){ if(!x||typeof x!=="object"||d>8) return;
       for(const k of Object.keys(x)){ if(yasak.test(k)){ delete x[k]; continue; } const v=x[k];
@@ -16484,6 +16506,56 @@ document.addEventListener("click",e=>{
   }
   window.webBildirim=goster;
 
+  /* ---- Web Push (kapalıyken bildirim) ---- */
+  const VAPID=(window.ACADEMY_PUSH&&window.ACADEMY_PUSH.vapid)||"";
+  const LS_PUSH="academy_push_on";
+  const pushAcik=()=>{ try{ return localStorage.getItem(LS_PUSH)==="1"; }catch(e){ return false; } };
+  const pushBayrak=v=>{ try{ v?localStorage.setItem(LS_PUSH,"1"):localStorage.removeItem(LS_PUSH); }catch(e){} };
+  const ios=()=>/iPhone|iPad|iPod/.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1);
+  const standalone=()=>!!(navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches));
+  const pushDestek=()=>!native&&!!VAPID&&window.isSecureContext&&"serviceWorker" in navigator&&"PushManager" in window&&destek();
+  const oturum=()=>window.academyHesap&&academyHesap.oturum?academyHesap.oturum():null;
+  const b64u=u=>{ const p="=".repeat((4-u.length%4)%4), b=(u+p).replace(/-/g,"+").replace(/_/g,"/"), raw=atob(b), a=new Uint8Array(raw.length); for(let i=0;i<raw.length;i++) a[i]=raw.charCodeAt(i); return a; };
+  const pushKayit=async()=>{ if(!("serviceWorker" in navigator)) return null;
+    let reg=await navigator.serviceWorker.getRegistration(); if(!reg){ try{ reg=await navigator.serviceWorker.register("sw.js"); }catch(e){ return null; } }
+    return Promise.race([navigator.serviceWorker.ready,new Promise(r=>setTimeout(()=>r(null),6000))]); };
+  const pushVeri=sub=>{ const j=sub.toJSON(), k=j.keys||{}, w=(typeof wx==="function"?wx():STATE.wx)||{}, a=bd(), o=oturum();
+    return {user_id:o.user.id,endpoint:j.endpoint,p256dh:k.p256dh,auth:k.auth,gunluk:!!a.gunluk,saat:a.saat||"20:00",seri:!!a.seri,sinav:a.sinav!==false,
+      wx:{on:w.on!==false,day:Number.isInteger(w.day)?w.day:0,hm:w.hm||"20:00"},tz:(Intl.DateTimeFormat().resolvedOptions().timeZone)||"Europe/Istanbul",ua:navigator.userAgent.slice(0,200)}; };
+  async function pushYaz(sub){
+    if(!oturum()) return false;
+    await academyHesap.istek("/rest/v1/push_subscriptions?on_conflict=endpoint",{method:"POST",headers:{Prefer:"resolution=merge-duplicates,return=minimal"},body:pushVeri(sub)});
+    return true; }
+  /* kullanıcı hareketiyle: izin iste, abone ol, hesaba kaydet */
+  async function pushAbone(){
+    if(!pushDestek()) throw new Error("Bu tarayıcı kapalıyken bildirimi desteklemiyor");
+    if(!oturum()) throw new Error("Önce hesabınla giriş yap");
+    if(Notification.permission!=="granted"){ const p=await Notification.requestPermission(); if(p!=="granted") throw new Error("Bildirim izni verilmedi"); }
+    const reg=await pushKayit(); if(!reg) throw new Error("Servis çalışanı hazır değil — sayfayı yenile ve tekrar dene");
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub) sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID)});
+    try{ await pushYaz(sub); }
+    catch(e){ try{ await sub.unsubscribe(); }catch(x){} throw new Error(/42501|row-level|violates|403/i.test(e.message)?"Bu cihaz başka bir hesaba kayıtlı — o hesaptan çıkış yapıp tekrar dene":"Sunucuya kaydedilemedi: "+e.message+" (supabase/push.sql çalıştırıldı mı?)"); }
+    pushBayrak(true); return true; }
+  async function pushCik(sessiz){
+    try{ const reg=await navigator.serviceWorker.getRegistration(); const sub=reg&&await reg.pushManager.getSubscription();
+      if(sub){ if(oturum()){ try{ await academyHesap.istek("/rest/v1/push_subscriptions?endpoint=eq."+encodeURIComponent(sub.endpoint),{method:"DELETE"}); }catch(e){ if(!sessiz) throw e; } }
+        await sub.unsubscribe(); } }catch(e){ if(!sessiz) throw e; }
+    pushBayrak(false); }
+  /* açılışta ve ayar değişince: sunucudaki satırı güncel tut; tarayıcı aboneliği düşürdüyse sessizce yenile */
+  async function pushSenkron(){
+    if(!pushAcik()||!pushDestek()||!oturum()||Notification.permission!=="granted") return;
+    try{ const reg=await pushKayit(); if(!reg) return; let sub=await reg.pushManager.getSubscription();
+      if(!sub) sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID)});
+      await pushYaz(sub); }catch(e){ console.warn("push senkron",e); } }
+  window.pushAbone=pushAbone; window.pushCik=pushCik; window.pushSenkron=pushSenkron;
+  setTimeout(pushSenkron,6000);
+
+  /* bildirime tıklayınca ilgili sayfa: ?git=exam (uygulama kapalıydı) ya da servis çalışanından ileti (açıktı) */
+  const gitSayfa=g=>{ if(["exam","dash","quiz"].includes(g)&&!document.getElementById("obWrap")) try{ go(g); }catch(e){} };
+  try{ const g=new URLSearchParams(location.search).get("git"); if(g){ history.replaceState(null,"",location.pathname); setTimeout(()=>gitSayfa(g),1800); } }catch(e){}
+  try{ if("serviceWorker" in navigator) navigator.serviceWorker.addEventListener("message",e=>{ const g=e.data&&e.data.git; if(g) gitSayfa(g); }); }catch(e){}
+
   /* ---- geri sayım (dashboard) ---- */
   window.tickCountdown=function(){
     const els=document.querySelectorAll(".cd"); if(!els.length) return;
@@ -16506,13 +16578,13 @@ document.addEventListener("click",e=>{
     if(document.getElementById("obWrap")) return;                 // kurulum sihirbazı açıkken bekle
     STATE.wxFired=onceki; saveState(); yonlendiriyor=true;
     if(window.acToast) acToast("Haftalık sınav saati geldi — Sınav Modu açılıyor",{kind:"ok",ms:4500});
-    if(bd().sinav&&document.visibilityState!=="visible") goster("Haftalık sınav saati","Sınav Modu seni bekliyor — başlamak için dokun.","haftalik-sinav");
+    if(bd().sinav&&document.visibilityState!=="visible"&&!pushAcik()) goster("Haftalık sınav saati","Sınav Modu seni bekliyor — başlamak için dokun.","haftalik-sinav");
     setTimeout(()=>{ try{ go("exam"); }catch(e){} yonlendiriyor=false; },900);
   }
 
   /* ---- günlük hatırlatma + seri uyarısı (yalnız tarayıcı; iOS uygulamasında yerel bildirimler kullanılır) ---- */
   function hatirlatmaKontrol(){
-    if(native||!destek()||Notification.permission!=="granted") return;
+    if(native||!destek()||Notification.permission!=="granted"||pushAcik()) return;   // push açıksa sunucu gönderir
     const a=bd(), bugun=yerelGun(), now=new Date(); STATE.wbGun=STATE.wbGun||{};
     const calisti=STATE.sonCalisma===todayISO();
     const dene=(ad,hm,aktif,baslik,govde)=>{ if(!aktif||STATE.wbGun[ad]===bugun) return;
@@ -16546,11 +16618,13 @@ document.addEventListener("click",e=>{
         <label style="display:flex;gap:10px;align-items:center;margin:6px 0"><input type="checkbox" id="wbSeri" ${a.seri?"checked":""} style="width:auto"><span>O gün çalışmadıysam 21:30'da seri uyarısı</span></label>
         <label style="display:flex;gap:10px;align-items:center;margin:6px 0"><input type="checkbox" id="wbSinav" ${a.sinav?"checked":""} style="width:auto"><span>Sınav saatinde de bildir</span></label>
         <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn ghost sm" type="button" id="wbTest">Test bildirimi gönder</button></div>
-        <p class="hint" id="wbDurum" style="margin-top:8px"></p>`
+        <p class="hint" id="wbDurum" style="margin-top:8px"></p>
+        <div id="wpBolum" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--edge)"><b>Uygulama kapalıyken de bildirim</b>
+          <p class="hint" id="wpDurum" style="margin:4px 0 8px"></p><button class="btn ghost sm" type="button" id="wpBtn" style="display:none"></button></div>`
         :`<p class="hint">Bu tarayıcı bildirimleri desteklemiyor. iPhone'da siteyi <b>Paylaş → Ana Ekrana Ekle</b> ile ekleyip oradan aç (iOS 16.4+).</p>`}`;
     const ref=document.getElementById("hbKart"); ref?ref.after(k):el.appendChild(k);
     const q=s=>k.querySelector(s);
-    q("#wxOn").onchange=q("#wxGun").onchange=q("#wxSaat").onchange=()=>{ STATE.wx={on:q("#wxOn").checked,day:+q("#wxGun").value,hm:q("#wxSaat").value||"20:00"}; STATE.wxFired=null; saveState(); if(window.acToast) acToast("Haftalık sınav güncellendi",{kind:"ok",ms:1800}); };
+    q("#wxOn").onchange=q("#wxGun").onchange=q("#wxSaat").onchange=()=>{ STATE.wx={on:q("#wxOn").checked,day:+q("#wxGun").value,hm:q("#wxSaat").value||"20:00"}; STATE.wxFired=null; saveState(); pushSenkron(); if(window.acToast) acToast("Haftalık sınav güncellendi",{kind:"ok",ms:1800}); };
     if(native||!destek()) return;
     const durum=()=>{ const i=Notification.permission, d=q("#wbDurum");
       d.textContent=i==="granted"?"✓ Bildirim izni açık. Bildirimler akademi açıkken (sekme ya da Ana Ekran uygulaması arka planda canlı kaldığı sürece) gelir; tamamen kapalıyken gelmez."
@@ -16560,8 +16634,26 @@ document.addEventListener("click",e=>{
     const kaydet=async()=>{ const yeni={gunluk:q("#wbGun").checked,saat:q("#wbSaat").value||"20:00",seri:q("#wbSeri").checked,sinav:q("#wbSinav").checked};
       if((yeni.gunluk||yeni.seri||yeni.sinav)&&Notification.permission!=="granted"){ let p="denied"; try{ p=await Notification.requestPermission(); }catch(e){}
         if(p!=="granted"){ q("#wbGun").checked=q("#wbSeri").checked=q("#wbSinav").checked=false; yeni.gunluk=yeni.seri=yeni.sinav=false; } }
-      STATE.bildirim=yeni; saveState(); durum(); };
+      STATE.bildirim=yeni; saveState(); durum(); pushSenkron(); };
     ["#wbGun","#wbSaat","#wbSeri","#wbSinav"].forEach(x=>q(x).onchange=kaydet);
+    /* Web Push bölümü */
+    const wpD=q("#wpDurum"), wpB=q("#wpBtn");
+    const wpCiz=async()=>{
+      if(!pushDestek()){ wpB.style.display="none";
+        wpD.textContent=ios()&&!standalone()?"iPhone/iPad'de kapalıyken bildirim için siteyi Safari'de Paylaş → Ana Ekrana Ekle ile ekleyip oradan aç (iOS 16.4+); bildirim izni de orada sorulur."
+          :!VAPID||!window.isSecureContext?"Bu sürümde sunucu bildirimi yok (yalnız yayındaki sitede çalışır).":"Bu tarayıcı kapalıyken bildirimi desteklemiyor.";
+        return; }
+      if(!oturum()){ wpB.style.display="none"; wpD.textContent="Kapalıyken bildirim için önce hesabınla giriş yap (bildirim hesabına bağlanır)."; return; }
+      let acik=false; try{ const reg=await navigator.serviceWorker.getRegistration(); acik=!!(reg&&await reg.pushManager.getSubscription())&&pushAcik(); }catch(e){}
+      wpB.style.display=""; wpB.textContent=acik?"Bu cihazda kapat":"Bu cihazda aç";
+      wpD.textContent=acik?"✓ Açık: yukarıdaki hatırlatmalar uygulama kapalıyken de bu cihaza gelir. Gönderimi sunucu yapar; bu cihazdaki saat dilimin kullanılır."
+        :"Açarsan günlük hatırlatma, seri uyarısı ve haftalık sınav bildirimi uygulama kapalıyken de gelir. Önce yukarıdan istediklerini işaretle."; };
+    wpB.onclick=async()=>{ wpB.disabled=true;
+      try{ if(pushAcik()){ await pushCik(false); if(window.acToast) acToast("Bu cihazda kapalı kalan bildirimler durduruldu",{kind:"ok"}); }
+        else { await pushAbone(); if(window.acToast) acToast("Bu cihaz kaydedildi — kapalıyken de bildirim gelecek",{kind:"ok"}); } }
+      catch(e){ if(window.acToast) acToast(e.message,{kind:"err",ms:7000}); }
+      wpB.disabled=false; wpCiz(); durum(); };
+    wpCiz();
     q("#wbTest").onclick=async()=>{ if(Notification.permission!=="granted"){ try{ await Notification.requestPermission(); }catch(e){} }
       const ok=await goster("Akademi English","Bildirimler çalışıyor ✓","akademi-test"); durum(); if(!ok&&window.acToast) acToast("Bildirim gönderilemedi — izni kontrol et",{kind:"err"}); };
   };
@@ -16589,6 +16681,126 @@ input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px color-mix(in srgb,v
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.ktile:hover,.btn:active{transform:none}}
 :root.ac-nomotion{scroll-behavior:auto}
 </style>
+<script>
+/* Uygulama yeniden açılınca sayfa başından başlar: tarayıcının "kaldığın kaydırma konumu" geri yüklemesi kapatılır;
+   açılışta/yeniden yüklemede ve arka plandan 10 dakikadan uzun süre sonra dönüşte en üste çıkılır. */
+(function(){
+  try{ if("scrollRestoration" in history) history.scrollRestoration="manual"; }catch(e){}
+  const ust=()=>{ try{ window.scrollTo({top:0,left:0,behavior:"instant"}); }catch(e){ window.scrollTo(0,0); } };
+  ust(); window.addEventListener("load",()=>{ ust(); setTimeout(ust,300); });
+  window.addEventListener("pageshow",ust);
+  let gizli=0;
+  document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden") gizli=Date.now(); else if(gizli&&Date.now()-gizli>10*60000){ gizli=0; ust(); } });
+})();
+</script>
+<script>
+/* ============================================================
+   ÜRETİM KAYITLARI (2026-10-14) — Writing, Speaking, Dikte ve Üretim Aktarım'da yazdığın/söylediğin metin ve analiz sonucu
+   sayfaya dönünce (yeniden açış dahil) aynen görünür; Reading/Listening/Grammar cevapları zaten renderQuestions'ta kalıcı.
+   STATE.uretim[anahtar] = {text, html, ht, t}; en yeni 60 kayıt tutulur. STATE.uretimSon = en son açık metin/konu (yeniden açınca aynı yere döner).
+   ============================================================ */
+(function(){
+  const g=id=>document.getElementById(id), MAX=60;
+  const E=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const store=()=>STATE.uretim||(STATE.uretim={});
+  const get=k=>(STATE.uretim||{})[k];
+  const tarih=t=>new Date(t||Date.now()).toLocaleDateString("tr-TR");
+  function put(k,patch){ const u=store(); const r=u[k]=Object.assign(u[k]||{},patch,{t:Date.now()});
+    if(typeof r.html==="string"&&r.html.length>40000) r.html=null;
+    const ks=Object.keys(u); if(ks.length>MAX) ks.sort((a,b)=>(u[a].t||0)-(u[b].t||0)).slice(0,ks.length-MAX).forEach(x=>delete u[x]);
+    saveState(); return r; }
+  function sil(k){ if(STATE.uretim&&STATE.uretim[k]){ delete STATE.uretim[k]; saveState(); } }
+  const son=()=>STATE.uretimSon||(STATE.uretimSon={});
+  const zamanlayici={}; const sonra=(ad,fn,ms)=>{ clearTimeout(zamanlayici[ad]); zamanlayici[ad]=setTimeout(fn,ms||700); };
+  function not(host,metin,onTemizle){ const d=document.createElement("div"); d.className="hint"; d.style.cssText="margin:0 0 10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap";
+    d.innerHTML=`<span>${metin}</span>`; if(onTemizle){ const b=document.createElement("button"); b.className="btn ghost sm"; b.type="button"; b.textContent="Temizle"; b.onclick=()=>{ d.remove(); onTemizle(); }; d.appendChild(b); }
+    host.parentNode.insertBefore(d,host); return d; }
+
+  /* ---- son açık metin/konu: yeniden açınca aynı yere dön ---- */
+  function sonKonuBagla(ad,renderer,oku,yaz){
+    let ilk=true; const _r=RENDERERS[renderer]; if(!_r) return;
+    RENDERERS[renderer]=function(){
+      if(ilk){ ilk=false; try{ const v=son()[ad]; if(v!=null) yaz(v); }catch(e){} }
+      const out=_r.apply(this,arguments);
+      try{ const v=oku(); if(v!=null&&JSON.stringify(son()[ad])!==JSON.stringify(v)){ son()[ad]=v; saveState(); } }catch(e){}
+      return out; };
+  }
+  sonKonuBagla("read","read",()=>{ const r=READINGS[curReading]; return r?r.n:null; },n=>{ const i=READINGS.findIndex(x=>x.n===n); if(i>-1) curReading=i; });
+  sonKonuBagla("listen","listen",()=>{ const l=LISTENINGS[curListening]; return l?l.n:null; },n=>{ const i=LISTENINGS.findIndex(x=>x.n===n); if(i>-1) curListening=i; });
+  sonKonuBagla("gram","gram",()=>{ const t=GTOPICS[curGram]; return t?t.id:null; },id=>{ const i=GTOPICS.findIndex(x=>x.id===id); if(i>-1) curGram=i; });
+  sonKonuBagla("write","write",()=>curWTopic?{b:curWTopic.book||"",t:curWTopic.t}:null,v=>{ const t=WRITING_TOPICS.find(x=>(x.book||"")===v.b&&x.t===v.t); if(t) curWTopic=t; });
+  sonKonuBagla("speak","speak",()=>SPEAKING_TOPICS[curS]?SPEAKING_TOPICS[curS].step:null,st=>{ const i=SPEAKING_TOPICS.findIndex(x=>x.step===st); if(i>-1) curS=i; });
+
+  /* ---- WRITING ---- */
+  { const _w=RENDERERS.write;
+    RENDERERS.write=function(){ const out=_w.apply(this,arguments); try{ yaziBagla(); }catch(e){ console.error(e); } return out; };
+    function yaziBagla(){
+      const t=curWTopic, ta=g("wText"), res=g("wRes"), btn=g("wGo"); if(!t||!ta||!res||!btn) return;
+      const key="w|"+(t.book||"")+"|"+t.t, r=get(key);
+      if(r&&r.text){ ta.value=r.text; if(ta.oninput) ta.oninput();
+        if(r.html&&r.ht===r.text) res.innerHTML=r.html;
+        not(ta,`Önceki yazın${r.html&&r.ht===r.text?" ve analizin":""} geri yüklendi · ${tarih(r.t)}`,()=>{ sil(key); ta.value=""; res.innerHTML=""; if(ta.oninput) ta.oninput(); }); }
+      let onceki=ta.value;
+      ta.addEventListener("input",()=>{ if(ta.value!==onceki){ onceki=ta.value; sonra("w",()=>put(key,{text:ta.value})); } });
+      let n0=0; btn.addEventListener("click",()=>{ n0=STATE.writingSubs.length; },true);
+      btn.addEventListener("click",()=>{ if(STATE.writingSubs.length>n0) put(key,{text:ta.value,html:res.innerHTML,ht:ta.value}); });
+      const clr=g("wClr"); if(clr) clr.addEventListener("click",()=>sil(key));
+    }
+  }
+
+  /* ---- SPEAKING ---- */
+  { const _s=RENDERERS.speak;
+    RENDERERS.speak=function(){ const out=_s.apply(this,arguments); try{ konusBagla(); }catch(e){ console.error(e); } return out; };
+    function konusBagla(){
+      const t=SPEAKING_TOPICS[curS], tx=g("liveTx"), res=g("sRes"), btn=g("sGo"); if(!t||!tx||!res||!btn) return;
+      const key="s|"+t.step, r=get(key);
+      if(r&&r.text&&!tx.textContent.trim()){ tx.textContent=r.text; try{ recFinal=r.text+" "; }catch(e){}
+        if(r.html&&r.ht===r.text) res.innerHTML=r.html;
+        not(tx,`Önceki konuşman${r.html&&r.ht===r.text?" ve analizin":""} geri yüklendi · ${tarih(r.t)}`,()=>{ sil(key); tx.textContent=""; res.innerHTML=""; try{ recFinal=""; }catch(e){} }); }
+      let onceki=tx.textContent;
+      const izle=()=>{ if(!g("liveTx")||g("liveTx")!==tx) return; const v=tx.textContent; if(v!==onceki){ onceki=v; sonra("s",()=>put(key,v.trim()?{text:v}:{text:""}),1200); } };
+      tx.addEventListener("input",izle); const iv=setInterval(()=>{ if(g("liveTx")!==tx){ clearInterval(iv); return; } izle(); },4000);
+      let n0=0; btn.addEventListener("click",()=>{ n0=STATE.speakingSubs.length; },true);
+      btn.addEventListener("click",()=>{ if(STATE.speakingSubs.length>n0) put(key,{text:tx.textContent.trim(),html:res.innerHTML,ht:tx.textContent.trim()}); });
+      const rs=g("recReset"); if(rs) rs.addEventListener("click",()=>sil(key));
+    }
+  }
+
+  /* ---- DİKTE (Listening) ---- */
+  if(typeof renderDictation==="function"){ const _rd=renderDictation;
+    renderDictation=function(host,li){ _rd(host,li); try{ dikteBagla(host,li); }catch(e){ console.error(e); } };
+    function dikteBagla(host,li){
+      const key="d|"+li.n, r=get(key), list=host.querySelector("#dictList"); if(!list) return;
+      if(r&&r.d){ Object.keys(r.d).forEach(i=>{ const x=r.d[i], inp=list.querySelector(`.dinp[data-i="${i}"]`), res=g("dr-"+i); if(!inp||!res) return;
+          inp.value=x.text||""; if(x.html){ res.innerHTML=x.html; const row=g("dl-"+i); if(row) row.classList.add("done"); if(x.pct!=null) dictAnswers[i]=x.pct; } });
+        const sum=g("dictSummary"); if(r.sum&&sum){ sum.style.display="block"; sum.innerHTML=r.sum; }
+        if(Object.keys(r.d).length) not(list,`Önceki dikte cevapların geri yüklendi · ${tarih(r.t)}`,()=>{ sil(key); dictAnswers={}; renderDictation(host,li); }); }
+      list.addEventListener("input",e=>{ const inp=e.target.closest(".dinp"); if(!inp) return; sonra("d"+inp.dataset.i,()=>{ const k=get(key)||{d:{}}; const d=Object.assign({},k.d||{}); d[inp.dataset.i]=Object.assign({},d[inp.dataset.i],{text:inp.value}); put(key,{d}); },900); });
+      list.addEventListener("click",e=>{ const b=e.target.closest(".dcheck"); if(!b) return; setTimeout(()=>{ const i=b.dataset.i, inp=list.querySelector(`.dinp[data-i="${i}"]`), res=g("dr-"+i); if(!inp||!res||!res.innerHTML.trim()) return;
+          const k=get(key)||{d:{}}; const d=Object.assign({},k.d||{}); d[i]={text:inp.value,html:res.innerHTML,pct:dictAnswers[i]};
+          const sum=g("dictSummary"); put(key,{d,sum:sum&&sum.style.display!=="none"?sum.innerHTML:(k.sum||null)}); },0); });
+    }
+  }
+
+  /* ---- ÜRETİM AKTARIM ---- */
+  { const _t=RENDERERS.transfer;
+    if(_t) RENDERERS.transfer=function(){ const out=_t.apply(this,arguments); try{ aktarimBagla(); }catch(e){ console.error(e); } return out; };
+    function aktarimBagla(){
+      const ta=g("trText"), res=g("trRes"), btn=g("trCheck"), pg=g("p-transfer"); if(!ta||!res||!btn||!pg) return;
+      const r=get("t|son"), ayni=r&&Array.isArray(r.words)&&JSON.stringify(r.words)===JSON.stringify(trWords);
+      if(r&&r.text){
+        if(ayni){ ta.value=r.text; if(ta.oninput) ta.oninput(); if(r.html) res.innerHTML=r.html; }
+        else if(r.html){ const k=document.createElement("div"); k.className="card"; k.style.marginTop="18px";
+          k.innerHTML=`<h3 style="margin-bottom:6px">Son aktarım görevin</h3><p class="hint" style="margin-bottom:8px">${tarih(r.t)} · hedef kelimeler: <b>${E((r.words||[]).join(", "))}</b></p>
+            <div class="mans" style="background:var(--sheet2);border-left-color:var(--edge2);white-space:pre-wrap;margin-bottom:12px">${E(r.text)}</div>${r.html}`;
+          pg.appendChild(k); } }
+      let n0=0; btn.addEventListener("click",()=>{ n0=STATE.transferTasks.length; },true);
+      btn.addEventListener("click",()=>{ if(STATE.transferTasks.length>n0) put("t|son",{text:ta.value,html:res.innerHTML,words:trWords.slice()}); });
+      let onceki=ta.value; ta.addEventListener("input",()=>{ if(ta.value!==onceki){ onceki=ta.value; sonra("t",()=>{ const k=get("t|son"); if(k&&JSON.stringify(k.words)===JSON.stringify(trWords)) put("t|son",{text:ta.value,html:k.ht===ta.value?k.html:k.html}); },900); } });
+    }
+  }
+})();
+</script>
 
 <!-- iOS'a özel: çentik / Dynamic Island ve alt çubuk için güvenli alan boşlukları (hazirla.sh ekler) -->
 <style id="ios-safe-area">
