@@ -437,7 +437,11 @@ label.fl{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margi
   font-size:13.5px;border:0;transition:transform .15s ease,filter .15s ease;text-align:left;width:100%}
 .qa:hover{transform:translateX(3px);filter:brightness(1.08)}
 .qa .qic{font-size:17px}
-.taskring{width:46px;height:46px;flex:none}
+.taskring{width:62px;height:62px;flex:none}
+.taskring .ringwrap{width:62px;height:62px;margin:0}
+.taskring .ringwrap svg{width:62px;height:62px}
+.taskring .rtxt b{font-size:13px}
+.taskring .rtxt span{font-size:8px}
 .task.done .tk{animation:flamePulse .5s ease 1}
 /* ---------- takvim 2.0: canlı ---------- */
 @keyframes cellIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
@@ -11829,7 +11833,7 @@ RENDERERS.dash=function(){
       <div class="hstat"><div class="hv">${STATE.profile.level}<span style="font-size:15px;opacity:.7">→${STATE.profile.target}</span></div><div class="hl">CEFR hedefi</div></div>
       <div class="hstat" style="margin-left:auto;text-align:right">
         <div class="hv" style="justify-content:flex-end"><span class="cd" style="font-size:20px">--:--:--</span></div>
-        <div class="hl">Sonraki quiz</div></div>
+        <div class="hl cdlbl">Haftalık sınav</div></div>
     </div>
     <div class="bar" style="height:6px;margin-top:16px;background:rgba(255,255,255,.25)">
       <i class="bargrow" style="width:${pct}%;background:#fff"></i></div>
@@ -11863,7 +11867,7 @@ RENDERERS.dash=function(){
         <div class="km">${m}</div></div>`).join("")}
   </div>
 
-  <div class="grid dz" style="animation-delay:.18s;grid-template-columns:1.35fr 1fr;gap:16px">
+  <div class="grid dz" style="animation-delay:.18s;grid-template-columns:1.35fr 1fr;gap:16px;align-items:start">
     <div class="card">
       <div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:10px">
         <div><h3>Bugün Ne Çalışacağım?</h3>
@@ -13619,14 +13623,41 @@ input,select,textarea{background-color:var(--sheet);color:var(--ink)}
 :root[data-ac-mode="dark"] .card3d{background:var(--sheet)}
 
 /* ---------- 11 · vurgu rengi ---------- */
-:root[data-ac-accent="green"]{--acc:#1F6B52;--acc-ink:#fff}
-:root[data-ac-accent="navy"]{--acc:#2F4A7A;--acc-ink:#fff}
-:root[data-ac-accent="bordo"]{--acc:#8C2F3C;--acc-ink:#fff}
-:root[data-ac-accent="purple"]{--acc:#5D4585;--acc-ink:#fff}
+:root[data-ac-accent="green"]{--acc:#1F6B52;--hero-a:#1F6B52;--acc-ink:#fff}
+:root[data-ac-accent="navy"]{--acc:#2F4A7A;--hero-a:#2F4A7A;--acc-ink:#fff}
+:root[data-ac-accent="bordo"]{--acc:#8C2F3C;--hero-a:#8C2F3C;--acc-ink:#fff}
+:root[data-ac-accent="purple"]{--acc:#5D4585;--hero-a:#5D4585;--acc-ink:#fff}
+:root[data-ac-accent="teal"]{--acc:#0F766E;--hero-a:#0F766E;--acc-ink:#fff}
+:root[data-ac-accent="ocean"]{--acc:#0B6FA4;--hero-a:#0B6FA4;--acc-ink:#fff}
+:root[data-ac-accent="indigo"]{--acc:#4338CA;--hero-a:#4338CA;--acc-ink:#fff}
+:root[data-ac-accent="rose"]{--acc:#BE3E6D;--hero-a:#BE3E6D;--acc-ink:#fff}
+:root[data-ac-accent="coral"]{--acc:#C84B2F;--hero-a:#C84B2F;--acc-ink:#fff}
+:root[data-ac-accent="orange"]{--acc:#B85A0A;--hero-a:#B85A0A;--acc-ink:#fff}
+:root[data-ac-accent="gold"]{--acc:#9A7010;--hero-a:#9A7010;--acc-ink:#fff}
+:root[data-ac-accent="olive"]{--acc:#566420;--hero-a:#566420;--acc-ink:#fff}
+:root[data-ac-accent="slate"]{--acc:#475569;--hero-a:#475569;--acc-ink:#fff}
+:root[data-ac-accent="brown"]{--acc:#7A4A2B;--hero-a:#7A4A2B;--acc-ink:#fff}
 :root[data-ac-mode="dark"][data-ac-accent="green"]{--acc:#5DBE98;--acc-ink:#0C1F18}
 :root[data-ac-mode="dark"][data-ac-accent="navy"]{--acc:#8BA9DD;--acc-ink:#0E1628}
 :root[data-ac-mode="dark"][data-ac-accent="bordo"]{--acc:#E08A96;--acc-ink:#2A0E13}
 :root[data-ac-mode="dark"][data-ac-accent="purple"]{--acc:#B7A1E0;--acc-ink:#1C1330}
+:root[data-ac-mode="dark"][data-ac-accent="teal"]{--acc:#4FC9BD;--acc-ink:#06201E}
+:root[data-ac-mode="dark"][data-ac-accent="ocean"]{--acc:#7CC4EE;--acc-ink:#06202F}
+:root[data-ac-mode="dark"][data-ac-accent="indigo"]{--acc:#A5A0F5;--acc-ink:#14123A}
+:root[data-ac-mode="dark"][data-ac-accent="rose"]{--acc:#F29BB8;--acc-ink:#35101D}
+:root[data-ac-mode="dark"][data-ac-accent="coral"]{--acc:#F2A08A;--acc-ink:#35130A}
+:root[data-ac-mode="dark"][data-ac-accent="orange"]{--acc:#F0A55C;--acc-ink:#301800}
+:root[data-ac-mode="dark"][data-ac-accent="gold"]{--acc:#E8C566;--acc-ink:#2B2005}
+:root[data-ac-mode="dark"][data-ac-accent="olive"]{--acc:#B9C96E;--acc-ink:#1B2008}
+:root[data-ac-mode="dark"][data-ac-accent="slate"]{--acc:#A9B6C9;--acc-ink:#10161F}
+:root[data-ac-mode="dark"][data-ac-accent="brown"]{--acc:#D9AE8C;--acc-ink:#27150A}
+:root:not([data-ac-accent="ink"]) .hero{background:linear-gradient(120deg,color-mix(in srgb,var(--hero-a) 50%,#000) 0%,color-mix(in srgb,var(--hero-a) 78%,#000) 55%,var(--hero-a) 100%)}
+/* kâğıt renkleri (yalnız açık tema) */
+:root[data-ac-mode="light"][data-ac-paper="mint"]{--paper:#EEF5F0;--sheet:#F6FAF7;--sheet2:#E4EEE7;--edge:#D3E2D8;--edge2:#BCD1C3;--rail:#E8F1EB}
+:root[data-ac-mode="light"][data-ac-paper="sky"]{--paper:#EDF4FA;--sheet:#F5F9FD;--sheet2:#E1ECF6;--edge:#CFDFEE;--edge2:#B6CCE1;--rail:#E8F0F8}
+:root[data-ac-mode="light"][data-ac-paper="lavender"]{--paper:#F1EFF8;--sheet:#F7F6FC;--sheet2:#E6E2F2;--edge:#D7D1EA;--edge2:#C0B8DC;--rail:#ECE9F5}
+:root[data-ac-mode="light"][data-ac-paper="rose"]{--paper:#FAF0F1;--sheet:#FDF6F7;--sheet2:#F3E1E3;--edge:#EBD0D3;--edge2:#DDB7BB;--rail:#F6E9EA}
+:root[data-ac-mode="light"][data-ac-paper="gray"]{--paper:#F0F1F2;--sheet:#F7F8F8;--sheet2:#E4E6E8;--edge:#D5D8DB;--edge2:#BDC1C6;--rail:#EAECED}
 :root:not([data-ac-accent="ink"]) .nav.on{background:var(--acc);color:var(--acc-ink)}
 :root:not([data-ac-accent="ink"]) .btn:not(.ghost):not(.red):not(.green){background:var(--acc);color:var(--acc-ink)}
 :root:not([data-ac-accent="ink"]) .nav.on .pip{background:var(--acc-ink);color:var(--acc)}
@@ -14804,9 +14835,9 @@ function openSettings(){
   const u=U();
   const html=`<h3>Arayüz ayarları</h3><p class="dm">Değişiklikler anında uygulanır ve bu tarayıcıda saklanır.</p>
    <div class="srow"><span>Tema</span>${seg("mode",[["light","Açık"],["dark","Koyu"],["auto","Sistem"]],u.mode)}</div>
-   <div class="srow"><span>Kâğıt<small>yalnız açık temada</small></span>${seg("paper",[["white","Beyaz"],["sepia","Sepia"]],u.paper)}</div>
+   <div class="srow" style="align-items:flex-start"><span>Kâğıt<small>yalnız açık temada</small></span>${seg("paper",[["white","Beyaz"],["sepia","Sepia"],["mint",`<i class="acsw" style="background:#CFE3D6"></i>Nane`],["sky",`<i class="acsw" style="background:#CBDDEE"></i>Gök`],["lavender",`<i class="acsw" style="background:#D6CFEA"></i>Lavanta`],["rose",`<i class="acsw" style="background:#EBCDD0"></i>Gül`],["gray",`<i class="acsw" style="background:#D3D6D9"></i>Gri`]],u.paper)}</div>
    <div class="srow"><span>Yoğunluk</span>${seg("density",[["comfy","Rahat"],["compact","Kompakt"],["ultra","Ultra"]],u.density)}</div>
-   <div class="srow"><span>Vurgu rengi</span>${seg("accent",[["ink",`<i class="acsw" style="background:#111"></i>Klasik`],["green",`<i class="acsw" style="background:#1F6B52"></i>Yeşil`],["navy",`<i class="acsw" style="background:#2F4A7A"></i>Lacivert`],["bordo",`<i class="acsw" style="background:#8C2F3C"></i>Bordo`],["purple",`<i class="acsw" style="background:#5D4585"></i>Mor`]],u.accent)}</div>
+   <div class="srow" style="align-items:flex-start"><span>Vurgu rengi<small>düğmeler, menü ve ana kart</small></span>${seg("accent",[["ink",`<i class="acsw" style="background:#111"></i>Klasik`],["green",`<i class="acsw" style="background:#1F6B52"></i>Yeşil`],["navy",`<i class="acsw" style="background:#2F4A7A"></i>Lacivert`],["bordo",`<i class="acsw" style="background:#8C2F3C"></i>Bordo`],["purple",`<i class="acsw" style="background:#5D4585"></i>Mor`],["teal",`<i class="acsw" style="background:#0F766E"></i>Turkuaz`],["ocean",`<i class="acsw" style="background:#0B6FA4"></i>Okyanus`],["indigo",`<i class="acsw" style="background:#4338CA"></i>İndigo`],["rose",`<i class="acsw" style="background:#BE3E6D"></i>Gül`],["coral",`<i class="acsw" style="background:#C84B2F"></i>Mercan`],["orange",`<i class="acsw" style="background:#B85A0A"></i>Turuncu`],["gold",`<i class="acsw" style="background:#9A7010"></i>Altın`],["olive",`<i class="acsw" style="background:#566420"></i>Zeytin`],["slate",`<i class="acsw" style="background:#475569"></i>Gri-mavi`],["brown",`<i class="acsw" style="background:#7A4A2B"></i>Kahve`]],u.accent)}</div>
    <div class="srow"><span>Yazı boyutu</span>${seg("zoom",[["0.9","%90"],["1","%100"],["1.15","%115"],["1.3","%130"]],u.zoom)}</div>
    <div class="srow"><span>Sidebar<small>masaüstünde</small></span>${seg("mini",[["false","Tam"],["true","İkon modu"]],!!u.mini)}</div>
    <div class="srow"><span>Animasyonlar</span>${seg("motion",[["true","Açık"],["false","Kapalı"]],!!u.motion)}</div>
@@ -16416,6 +16447,148 @@ document.addEventListener("click",e=>{
   };
 })();
 </script>
+<script>
+/* ============================================================
+   HAFTALIK SINAV GERİ SAYIMI + WEB BİLDİRİMLERİ (2026-10-14)
+   - Dashboard'daki 20 dk'lık "sonraki quiz" sayacı kaldırıldı; yerine haftalık sınav saati (varsayılan Pazar 20:00) sayılır.
+     Süre dolunca (uygulama açıksa) Sınav Modu kendiliğinden açılır; sınav saatinden sonraki 30 dk içinde açılırsa da yönlendirir.
+   - Tarayıcı/PWA bildirimleri: günlük hatırlatma, "çalışmadıysan" seri uyarısı (21:30), haftalık sınav. Uygulama tamamen kapalıyken
+     tarayıcı bildirim gönderemez (sunucu yok); iOS'ta bildirim için siteyi Ana Ekrana ekleyip oradan açmak gerekir.
+   - iOS uygulamasında (Capacitor) mevcut yerel bildirim bloğu çalışmaya devam eder.
+   Ayarlar: STATE.wx = {on, day (0=Pazar), hm}, STATE.bildirim = {gunluk, saat, seri, sinav}
+   ============================================================ */
+(function(){
+  const GUN=["Pazar","Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi"], KISA=["Paz","Pzt","Sal","Çar","Per","Cum","Cmt"];
+  const E=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const native=(()=>{ try{ const C=window.Capacitor; return !!(C&&C.isNativePlatform&&C.isNativePlatform()); }catch(e){ return false; } })();
+  const p2=n=>String(n).padStart(2,"0");
+  const yerelGun=d=>(d||new Date()).getFullYear()+"-"+p2((d||new Date()).getMonth()+1)+"-"+p2((d||new Date()).getDate());
+
+  /* ---- ayarlar ---- */
+  const wx=()=>{ const w=STATE.wx||{}; return {on:w.on!==false, day:Number.isInteger(w.day)&&w.day>=0&&w.day<=6?w.day:0, hm:/^\d{2}:\d{2}$/.test(w.hm||"")?w.hm:"20:00"}; };
+  const bd=()=>Object.assign({gunluk:false,saat:"20:00",seri:false,sinav:true},STATE.bildirim||{});
+  function sonraki(c){ c=c||wx(); const [h,m]=c.hm.split(":").map(Number); const t=new Date(); t.setHours(h,m,0,0);
+    t.setDate(t.getDate()+((c.day-t.getDay()+7)%7)); if(t.getTime()<=Date.now()) t.setDate(t.getDate()+7); return t.getTime(); }
+  window.haftalikSinav={ayar:wx,sonraki};
+
+  /* ---- bildirim gönderme ---- */
+  const destek=()=>"Notification" in window;
+  async function goster(baslik,govde,etiket){
+    try{
+      if(!destek()||Notification.permission!=="granted") return false;
+      const reg=navigator.serviceWorker&&navigator.serviceWorker.getRegistration?await navigator.serviceWorker.getRegistration():null;
+      const o={body:govde,tag:etiket||undefined,icon:"ikon-192.png",badge:"ikon-192.png"};
+      if(reg&&reg.showNotification) await reg.showNotification(baslik,o); else new Notification(baslik,o);
+      return true;
+    }catch(e){ return false; }
+  }
+  window.webBildirim=goster;
+
+  /* ---- geri sayım (dashboard) ---- */
+  window.tickCountdown=function(){
+    const els=document.querySelectorAll(".cd"); if(!els.length) return;
+    const c=wx(), lbl=document.querySelectorAll(".cdlbl");
+    if(!c.on){ els.forEach(e=>e.textContent="—"); lbl.forEach(e=>e.textContent="Haftalık sınav kapalı"); }
+    else{ const rem=Math.max(0,sonraki(c)-Date.now()), g=Math.floor(rem/864e5);
+      const t=`${p2(Math.floor(rem/36e5)%24)}:${p2(Math.floor(rem/6e4)%60)}:${p2(Math.floor(rem/1000)%60)}`;
+      els.forEach(e=>e.textContent=g>0?`${g}g ${t}`:t); lbl.forEach(e=>e.textContent=`Haftalık sınav · ${KISA[c.day]} ${c.hm}`); }
+    clearTimeout(window.__cd); window.__cd=setTimeout(window.tickCountdown,1000);
+  };
+
+  /* ---- sınav saati: yönlendirme + bildirim ---- */
+  let yonlendiriyor=false;
+  function sinavKontrol(){
+    const c=wx(); if(!c.on||yonlendiriyor) return;
+    if(STATE.profile&&STATE.profile.onboarded===false) return;
+    const onceki=sonraki(c)-7*864e5, gec=Date.now()-onceki;
+    if(gec<0||gec>30*60000||STATE.wxFired===onceki) return;
+    if(typeof exam2!=="undefined"&&exam2) return;               // sınav sürerken kesme
+    if(document.getElementById("obWrap")) return;                 // kurulum sihirbazı açıkken bekle
+    STATE.wxFired=onceki; saveState(); yonlendiriyor=true;
+    if(window.acToast) acToast("Haftalık sınav saati geldi — Sınav Modu açılıyor",{kind:"ok",ms:4500});
+    if(bd().sinav&&document.visibilityState!=="visible") goster("Haftalık sınav saati","Sınav Modu seni bekliyor — başlamak için dokun.","haftalik-sinav");
+    setTimeout(()=>{ try{ go("exam"); }catch(e){} yonlendiriyor=false; },900);
+  }
+
+  /* ---- günlük hatırlatma + seri uyarısı (yalnız tarayıcı; iOS uygulamasında yerel bildirimler kullanılır) ---- */
+  function hatirlatmaKontrol(){
+    if(native||!destek()||Notification.permission!=="granted") return;
+    const a=bd(), bugun=yerelGun(), now=new Date(); STATE.wbGun=STATE.wbGun||{};
+    const calisti=STATE.sonCalisma===todayISO();
+    const dene=(ad,hm,aktif,baslik,govde)=>{ if(!aktif||STATE.wbGun[ad]===bugun) return;
+      const [h,m]=hm.split(":").map(Number), hedef=new Date(); hedef.setHours(h,m,0,0);
+      const gec=now-hedef; if(gec<0||gec>4*36e5) return;             // saatten sonraki 4 saat içinde
+      STATE.wbGun[ad]=bugun; saveState();
+      if(!calisti) goster(baslik,govde,"akademi-"+ad); };
+    dene("gunluk",a.saat,a.gunluk,"Bugünkü İngilizce çalışman",`Günün dersi hazır${STATE.streak>1?` · 🔥 ${STATE.streak} günlük seri`:""}. 10 dakika bile yeter.`);
+    dene("seri","21:30",a.seri,"Serini kaybetme",STATE.streak>1?`🔥 ${STATE.streak} günlük serin bitmek üzere — bir kısa test çöz.`:"Bugün henüz çalışmadın — bir kelime tekrarı yeter.");
+  }
+  const dongu=()=>{ try{ sinavKontrol(); hatirlatmaKontrol(); }catch(e){} };
+  setInterval(dongu,15000);
+  document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible") dongu(); });
+  setTimeout(dongu,3500);
+
+  /* ---- Profile kartı ---- */
+  const _prof=RENDERERS.prof;
+  RENDERERS.prof=function(){
+    _prof.apply(this,arguments);
+    const el=document.getElementById("p-prof"); if(!el||document.getElementById("wbKart")) return;
+    const c=wx(), a=bd(), izin=destek()?Notification.permission:"yok";
+    const k=document.createElement("div"); k.className="card"; k.id="wbKart"; k.style.marginBottom="18px";
+    k.innerHTML=`<h3 style="margin-bottom:8px">Haftalık sınav${native?"":" ve hatırlatmalar"}</h3>
+      <label style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0"><input type="checkbox" id="wxOn" ${c.on?"checked":""} style="width:auto">
+        <span>Haftalık sınavı başlat:</span>
+        <select id="wxGun" style="width:auto">${GUN.map((g,i)=>`<option value="${i}"${i===c.day?" selected":""}>${g}</option>`).join("")}</select>
+        <input type="time" id="wxSaat" value="${c.hm}" style="width:auto"></label>
+      <p class="hint" style="margin:2px 0 10px">Dashboard'da geri sayım görünür. Süre dolunca akademi açıksa Sınav Modu kendiliğinden açılır.</p>
+      ${native?"":destek()?`<label style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0"><input type="checkbox" id="wbGun" ${a.gunluk?"checked":""} style="width:auto">
+          <span>Her gün hatırlat, saat</span><input type="time" id="wbSaat" value="${a.saat}" style="width:auto"></label>
+        <label style="display:flex;gap:10px;align-items:center;margin:6px 0"><input type="checkbox" id="wbSeri" ${a.seri?"checked":""} style="width:auto"><span>O gün çalışmadıysam 21:30'da seri uyarısı</span></label>
+        <label style="display:flex;gap:10px;align-items:center;margin:6px 0"><input type="checkbox" id="wbSinav" ${a.sinav?"checked":""} style="width:auto"><span>Sınav saatinde de bildir</span></label>
+        <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn ghost sm" type="button" id="wbTest">Test bildirimi gönder</button></div>
+        <p class="hint" id="wbDurum" style="margin-top:8px"></p>`
+        :`<p class="hint">Bu tarayıcı bildirimleri desteklemiyor. iPhone'da siteyi <b>Paylaş → Ana Ekrana Ekle</b> ile ekleyip oradan aç (iOS 16.4+).</p>`}`;
+    const ref=document.getElementById("hbKart"); ref?ref.after(k):el.appendChild(k);
+    const q=s=>k.querySelector(s);
+    q("#wxOn").onchange=q("#wxGun").onchange=q("#wxSaat").onchange=()=>{ STATE.wx={on:q("#wxOn").checked,day:+q("#wxGun").value,hm:q("#wxSaat").value||"20:00"}; STATE.wxFired=null; saveState(); if(window.acToast) acToast("Haftalık sınav güncellendi",{kind:"ok",ms:1800}); };
+    if(native||!destek()) return;
+    const durum=()=>{ const i=Notification.permission, d=q("#wbDurum");
+      d.textContent=i==="granted"?"✓ Bildirim izni açık. Bildirimler akademi açıkken (sekme ya da Ana Ekran uygulaması arka planda canlı kaldığı sürece) gelir; tamamen kapalıyken gelmez."
+        :i==="denied"?"Bildirim izni kapalı. iPhone: Ayarlar → Bildirimler → Akademi; masaüstü: adres çubuğundaki kilit simgesi → Bildirimler → İzin ver."
+        :"Bir kutuyu işaretleyince tarayıcı bildirim izni soracak."; };
+    durum();
+    const kaydet=async()=>{ const yeni={gunluk:q("#wbGun").checked,saat:q("#wbSaat").value||"20:00",seri:q("#wbSeri").checked,sinav:q("#wbSinav").checked};
+      if((yeni.gunluk||yeni.seri||yeni.sinav)&&Notification.permission!=="granted"){ let p="denied"; try{ p=await Notification.requestPermission(); }catch(e){}
+        if(p!=="granted"){ q("#wbGun").checked=q("#wbSeri").checked=q("#wbSinav").checked=false; yeni.gunluk=yeni.seri=yeni.sinav=false; } }
+      STATE.bildirim=yeni; saveState(); durum(); };
+    ["#wbGun","#wbSaat","#wbSeri","#wbSinav"].forEach(x=>q(x).onchange=kaydet);
+    q("#wbTest").onclick=async()=>{ if(Notification.permission!=="granted"){ try{ await Notification.requestPermission(); }catch(e){} }
+      const ok=await goster("Akademi English","Bildirimler çalışıyor ✓","akademi-test"); durum(); if(!ok&&window.acToast) acToast("Bildirim gönderilemedi — izni kontrol et",{kind:"err"}); };
+  };
+})();
+</script>
+<style>
+/* ---------- arayüz cilası (2026-10-14): tutarlı geçişler, dokunma geri bildirimi, yumuşak kaydırma ---------- */
+html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}
+button,.btn,.nav,.fbtn,.chip,.ktile,.qa,.task,.opt,.tocitem,select,input[type="checkbox"]{touch-action:manipulation}
+.btn,.nav,.fbtn,.tocitem,.opt,.task,.chip,.qa,.ktile,.card,input,select,textarea{transition:background-color .18s ease,color .18s ease,border-color .18s ease,box-shadow .2s ease,transform .18s ease,opacity .18s ease,filter .18s ease}
+.btn:not(:disabled):active,.fbtn:active,.qa:active,.tocitem:active{transform:scale(.97)}
+.ktile{cursor:pointer}
+.ktile:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
+.ktile:active{transform:scale(.98)}
+.task:hover{background:color-mix(in srgb,var(--ink) 3.5%,transparent)}
+.task .tk{transition:background-color .2s ease,border-color .2s ease,color .2s ease,transform .2s cubic-bezier(.3,1.6,.5,1)}
+.task.done .tk{transform:scale(1.08)}
+.card{transition:box-shadow .25s ease,border-color .25s ease}
+.nav{transition:background-color .15s ease,color .15s ease,padding .15s ease}
+input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px color-mix(in srgb,var(--ring,var(--blue)) 22%,transparent)}
+.bar i,.bargrow{transition:width .7s cubic-bezier(.3,.9,.3,1)}
+#acToasts>*{animation:acToastIn .22s cubic-bezier(.2,.8,.3,1)}
+@keyframes acToastIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+@media (hover:none){.ktile:hover{transform:none;box-shadow:none}.task:hover{background:none}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.ktile:hover,.btn:active{transform:none}}
+:root.ac-nomotion{scroll-behavior:auto}
+</style>
 
 <!-- iOS'a özel: çentik / Dynamic Island ve alt çubuk için güvenli alan boşlukları (hazirla.sh ekler) -->
 <style id="ios-safe-area">
