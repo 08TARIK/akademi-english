@@ -2,6 +2,7 @@
 <html lang="tr"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="akademi-surum" content="202610160140">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#1B3A5C">
 <link rel="manifest" href="manifest.webmanifest">
@@ -16645,6 +16646,12 @@ document.addEventListener("click",e=>{
         :`<p class="hint">Bu tarayıcı bildirimleri desteklemiyor. iPhone'da siteyi <b>Paylaş → Ana Ekrana Ekle</b> ile ekleyip oradan aç (iOS 16.4+).</p>`}`;
     const ref=document.getElementById("hbKart"); ref?ref.after(k):el.appendChild(k);
     const q=s=>k.querySelector(s);
+    const sm=document.querySelector('meta[name="akademi-surum"]');   // yalnız site derlemesinde var
+    if(sm&&"serviceWorker" in navigator){ const p=document.createElement("p"); p.className="hint"; p.style.marginTop="12px";
+      p.innerHTML=`Site sürümü: <b>${E(sm.content)}</b> · <a href="#" id="surumYenile">güncellemeyi denetle</a>`; k.appendChild(p);
+      p.querySelector("#surumYenile").onclick=async e=>{ e.preventDefault();
+        try{ const rs=await navigator.serviceWorker.getRegistrations(); for(const r of rs) await r.unregister(); const ks=await caches.keys(); for(const x of ks) await caches.delete(x); }catch(x){}
+        location.replace(location.pathname+"?yenile="+Date.now()); }; }
     q("#wxOn").onchange=q("#wxGun").onchange=q("#wxSaat").onchange=()=>{ STATE.wx={on:q("#wxOn").checked,day:+q("#wxGun").value,hm:q("#wxSaat").value||"20:00"}; STATE.wxFired=null; saveState(); pushSenkron(); if(window.acToast) acToast("Haftalık sınav güncellendi",{kind:"ok",ms:1800}); };
     if(native||!destek()) return;
     const durum=()=>{ const i=Notification.permission, d=q("#wbDurum");
