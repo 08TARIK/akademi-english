@@ -1,6 +1,6 @@
 /* Akademi English — çevrimdışı önbellek. Sayfa: önce ağ (her zaman güncel sürüm), ağ yoksa önbellek.
    Supabase (giriş, senkron, kitaplık) ve diğer sitelerin istekleri önbelleğe alınmaz. */
-const SURUM = "202610140112";
+const SURUM = "202610160119";
 const ONBELLEK = "akademi-" + SURUM;
 const TEMEL = ["./", "index.html", "bulut-ayar.js", "gizlilik.html", "manifest.webmanifest", "ikon-192.png", "ikon-512.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(ONBELLEK).then(c => c.addAll(TEMEL)).then(() => self.skipWaiting())); });

@@ -6,4 +6,4 @@ window.ACADEMY_CLOUD = window.ACADEMY_CLOUD || {
 };
 
 /* Web Push: genel (gizli olmayan) VAPID anahtarı. Özel anahtar yalnız Supabase Edge Function sırlarında durur. */
-window.ACADEMY_PUSH = window.ACADEMY_PUSH || { vapid: "BHFu3Mrmq0tXD3EwU8QwfqdAiUMtAqmYReDcVdIFfICa-H7Mr8hADD54WPI0lUE8xNmndhQzWGKS419-VSFyetg" };
+window.ACADEMY_PUSH = window.ACADEMY_PUSH || { vapid: "BD86TaQU8MdzD6ETDrS5ZG-H38UC4di8lLdNwO8wHlHpLPRaW9BJlMGbrDV01M6fzy8JaatNYnsAIEWYsFgpL9Q" };

@@ -530,6 +530,7 @@ label.fl{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margi
     <button class="nav" data-p="quiz"><span class="ic">◈</span>Quizzes <span class="hint" style="font-size:10px;margin-left:4px">öğrenme</span></button>
     <button class="nav" data-p="exam"><span class="ic">⏱</span>Sınav Modu <span class="hint" style="font-size:10px;margin-left:4px">süreli</span></button>
     <button class="nav" data-p="place"><span class="ic">◎</span>Seviye Tespiti</button>
+    <button class="nav" data-p="ielts"><span class="ic">◆</span>IELTS Merkezi</button>
     <div class="navsec">Analiz</div>
     <button class="nav" data-p="weak"><span class="ic">◭</span>Zayıf Nokta Radarı<span class="pip" id="pipWeak">0</span></button>
     <button class="nav" data-p="cover"><span class="ic">◫</span>Okuma Kalibrasyonu</button>
@@ -561,6 +562,7 @@ label.fl{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margi
     <section class="page" id="p-quiz"></section>
     <section class="page" id="p-place"></section>
     <section class="page" id="p-weak"></section>
+    <section class="page" id="p-ielts"></section>
     <section class="page" id="p-prog"></section>
     <section class="page" id="p-mastery"></section>
     <section class="page" id="p-cover"></section>
@@ -8791,6 +8793,12 @@ const RESOURCES=[
  {n:"Suits",url:null,k:"Dizi",lv:["B2","C1"],tags:["Hukuk","İş Dünyası"],acc:"US",d:"Hukuk ve iş İngilizcesi, hızlı diyaloglar.",task:"Bir müzakere sahnesinden 5 iş ifadesi çıkar."},
  {n:"Black Mirror",url:null,k:"Dizi",lv:["B2","C1"],tags:["Teknoloji","Yapay Zekâ","Psikoloji"],acc:"UK",d:"Teknoloji ve toplum üzerine İngiliz dizisi.",task:"Bir bölümün temasını AI Güncel Konu'da tartışma konusu yap."},
  {n:"Oxford Bookworms (graded readers)",url:null,k:"Kitap",lv:["A2","B1"],tags:["Sanat","Tarih"],acc:"UK",d:"Seviyelendirilmiş kısaltılmış romanlar — extensive reading için.",task:"Seviyendeki bir kitaptan günde 10 sayfa oku, Girdi Günlüğü'ne yaz."},
+ {n:"IDP · Ücretsiz IELTS deneme testleri",url:"https://ielts.idp.com/prepare/article-free-practice-tests",k:"Sınav",lv:["B1","B2","C1"],tags:["IELTS"],acc:"UK",d:"Tam ücretsiz deneme setleri — başlangıç ve tam deneme için.",task:"IELTS Merkezi → Kaynaklar'dan da açılır; sonucu Denemeler sekmesine gir."},
+ {n:"IDP · Listening soru örnekleri",url:"https://ielts.idp.com/about/news-and-articles/article-free-listening-practice-questions",k:"Sınav",lv:["B1","B2","C1"],tags:["IELTS"],acc:"UK",d:"Listening soru türleri ve ücretsiz alıştırmalar.",task:"IELTS Merkezi → Kaynaklar'dan da açılır; sonucu Denemeler sekmesine gir."},
+ {n:"IDP · Speaking soru örnekleri",url:"https://ielts.idp.com/about/news-and-articles/article-free-speaking-practice-questions",k:"Sınav",lv:["B1","B2","C1"],tags:["IELTS"],acc:"UK",d:"Part 1/2/3 örnek soruları.",task:"IELTS Merkezi → Kaynaklar'dan da açılır; sonucu Denemeler sekmesine gir."},
+ {n:"IDP · Academic Writing soru örnekleri",url:"https://ielts.idp.com/about/news-and-articles/article-academic-writing-free-practice-questions",k:"Sınav",lv:["B1","B2","C1"],tags:["IELTS"],acc:"UK",d:"Task 1 ve Task 2 örnek soruları.",task:"IELTS Merkezi → Kaynaklar'dan da açılır; sonucu Denemeler sekmesine gir."},
+ {n:"IDP · Academic Reading soru örnekleri",url:"https://ielts.idp.com/about/news-and-articles/article-academic-reading-free-practice-questions",k:"Sınav",lv:["B1","B2","C1"],tags:["IELTS"],acc:"UK",d:"Reading soru türleri ve alıştırmalar.",task:"IELTS Merkezi → Kaynaklar'dan da açılır; sonucu Denemeler sekmesine gir."},
+ {n:"IDP · Speaking band tanımları",url:"https://ielts.idp.com/prepare/article-understanding-the-ielts-speaking-band-descriptors",k:"Sınav",lv:["B1","B2","C1"],tags:["IELTS"],acc:"UK",d:"Speaking puanlama ölçütleri: akıcılık, kelime, gramer, telaffuz.",task:"IELTS Merkezi → Kaynaklar'dan da açılır; sonucu Denemeler sekmesine gir."},
  /* --- İlknur Acar'ın "5 Adımda Tek Başına İngilizce Öğren" videosundaki kaynaklardan (2026-10-09) --- */
  {n:"EF SET (ücretsiz seviye testi)",url:"https://www.efset.org/",k:"Sınav",lv:["A1","C2"],tags:["Eğitim"],acc:"Karma",d:"Okuma ve dinleme ile CEFR seviyeni ölçen ücretsiz çevrimiçi test.",task:"Testi çöz, sonucu Seviye Tespiti ile karşılaştır; ikisi 1 seviyeden fazla ayrışırsa Seviye Tespiti'ni tekrarla."},
  {n:"VOA Learning English — kurslar",url:"https://learningenglish.voanews.com/p/5644.html",k:"Video",lv:["A1","B1"],tags:["Eğitim"],acc:"US",d:"A1–B1 için adım adım video ve alıştırmalı ücretsiz kurslar.",task:"Bir dersin videosunu izle, alıştırmasını çöz, 5 yeni kelimeyi Word Library'ye ekle."},
@@ -14908,7 +14916,7 @@ function openDashEditor(){
 
 /* ---------------- 47 · yedek ---------------- */
 let DL=null; (async()=>{ try{ DL=window.claude&&claude.use?await claude.use("downloads"):null; }catch(e){ DL=null; } })();
-function backupJSON(){ return JSON.stringify(Object.assign({_yedek:{uygulama:"academy_v2",tarih:new Date().toISOString()}},STATE),null,1); }
+function backupJSON(){ let ek={}; try{ if(window.ieltsEk) ek=window.ieltsEk(); }catch(e){} return JSON.stringify(Object.assign({_yedek:{uygulama:"academy_v2",tarih:new Date().toISOString()}},STATE,ek),null,1); }
 function openBackup(){
   const u=U(), json=backupJSON(), kb=Math.round(json.length/1024);
   const m=openModal(`<h3>Yedek al ve geri yükle</h3>
@@ -14942,7 +14950,7 @@ function openBackup(){
     const when=o._yedek&&o._yedek.tarih?o._yedek.tarih.slice(0,10):"tarihsiz";
     m.close();
     if(!await askConfirm({title:"Yedekten geri yüklensin mi?",msg:`${when} tarihli yedek, şu anki ilerlemenin yerine geçecek. Bu işlem geri alınamaz.`,ok:"Evet, geri yükle",danger:true})) return;
-    delete o._yedek; o._savedAt=Date.now();   // geri yüklenen ilerleme en yeni sayılsın: hesap senkronu buluttakiyle ezmesin, buluta yazsın
+    delete o._yedek; (window.ieltsEkAnahtarlar||[]).forEach(k=>{ delete o[k]; }); o._savedAt=Date.now();   // geri yüklenen ilerleme en yeni sayılsın: hesap senkronu buluttakiyle ezmesin, buluta yazsın
     try{ localStorage.setItem("academy_v2",JSON.stringify(o)); }catch(e){ acToast("Tarayıcı hafızasına yazılamadı: "+e.message,{kind:"err"}); return; }
     acToast("Yedek yüklendi, sayfa yenileniyor…",{kind:"ok"}); setTimeout(()=>{ try{ location.reload(); }catch(e){ acToast("Sayfayı yenile, yedeğin hazır.",{kind:"info"}); } },700);
   };
@@ -16411,6 +16419,8 @@ document.addEventListener("click",e=>{
     (function t(x,d){ if(!x||typeof x!=="object"||d>8) return;
       for(const k of Object.keys(x)){ if(yasak.test(k)){ delete x[k]; continue; } const v=x[k];
         if(typeof v==="string"&&v.length>400) x[k]=v.slice(0,400); else t(v,d+1); } })(o,0);
+    delete o.ielts;                                                       // ham veri yerine aşağıdaki düzenli ek alanlar (yazılar kısaltılmadan)
+    try{ if(window.ieltsEk) Object.assign(o,window.ieltsEk()); }catch(e){ console.warn("IELTS ek alanlar",e); }
     return JSON.stringify(Object.assign({_yedek:{uygulama:"academy_v2",tarih:new Date().toISOString(),kaynak:"vault-gonder"}},o),null,1);
   }
   const izinli=async(h,iste)=>{ try{ const o={mode:"readwrite"}; if((await h.queryPermission(o))==="granted") return true; if(!iste) return false; return (await h.requestPermission(o))==="granted"; }catch(e){ return false; } };
@@ -16443,6 +16453,17 @@ document.addEventListener("click",e=>{
     }finally{ calisiyor=false; }
   }
   window.vaultGonder=vaultGonder; window.vaultGorunur=gorunur; window.vaultVeri=vaultVeri;
+  /* genel dosya (ör. Writing .md): klasör seçili/izinliyse oraya yazar → true; seçici iptal → "iptal"; yazılamadıysa false (çağıran indirir) */
+  window.vaultDosya=async function(ad,metin){
+    try{
+      let h=await idbAl(); if(h&&!(await izinli(h,true))) h=null;
+      if(!h&&typeof window.showDirectoryPicker==="function"){
+        toast("Obsidian → My Brain → raw → English → Academy Yedek klasörünü seç",{kind:"info",ms:7000});
+        try{ h=await window.showDirectoryPicker({id:"akademi-vault",mode:"readwrite"}); await idbKoy(h); }catch(e){ return e&&e.name==="AbortError"?"iptal":false; }
+      }
+      if(!h) return false;
+      await dosyaYaz(h,ad,metin); toast(`Vault'a yazıldı: ${h.name}/${ad}`,{kind:"ok",ms:5000}); return true;
+    }catch(e){ return false; } };
 
   /* otomatik: sekme gizlenirken ve her gün ilk açılışta, yalnız klasör seçilmiş + izin sürüyorsa */
   let sonOto=0;
@@ -16798,6 +16819,430 @@ input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px color-mix(in srgb,v
       btn.addEventListener("click",()=>{ if(STATE.transferTasks.length>n0) put("t|son",{text:ta.value,html:res.innerHTML,words:trWords.slice()}); });
       let onceki=ta.value; ta.addEventListener("input",()=>{ if(ta.value!==onceki){ onceki=ta.value; sonra("t",()=>{ const k=get("t|son"); if(k&&JSON.stringify(k.words)===JSON.stringify(trWords)) put("t|son",{text:ta.value,html:k.ht===ta.value?k.html:k.html}); },900); } });
     }
+  }
+})();
+</script>
+<script>
+/* ============================================================
+   IELTS & ERASMUS MERKEZİ (2026-10-16) — yeni sayfa "IELTS Merkezi" (p-ielts), sekmeler:
+   Özet (beceri bazlı dakika) · Denemeler (L/R/W/S girişi) · Writing (Task 1/2 süreli) · Speaking (Part 1/2/3 kartları)
+   · Erasmus pratik (50 soru, 2 puan, geçme 60) · Hata defteri (türe göre sayım + SRS kuyruğu) · Kaynaklar (IDP).
+   Veri: STATE.ielts = {denemeler, hatalar, yazilar, konusma, erasmus, sn:{gün:{beceri:saniye}}}.
+   Dışa aktarma (Vault'a gönder + Verileri dışa aktar JSON) şu EK alanları taşır (mevcut alanlar değişmez):
+   dakika_beceri, dakika_beceri_gunluk, ielts_denemeleri, erasmus_pratik, hata_defteri, hata_defteri_ozet, yazi_gonderimleri, speaking_oturumlari
+   ============================================================ */
+(function(){
+  const E=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const toast=(m,o)=>window.acToast?acToast(m,o):console.log(m);
+  const BECERI=[["listening","Listening"],["reading","Reading"],["writing","Writing"],["speaking","Speaking"],["kelime_gramer","Kelime-Gramer"]];
+  const TURLER=["gramer","yazım","kelime","bağlaç","konu","okuma","diğer"];
+  const DENEME_TURLERI=["Başlangıç","Bölüm denemesi","Tam deneme","Erasmus pratik","Gerçek sınav"];
+  const SRS_ARALIK=[1,3,7,14,30];
+  function I(){ const d=STATE.ielts=(STATE.ielts&&typeof STATE.ielts==="object")?STATE.ielts:{};
+    ["denemeler","hatalar","yazilar","konusma","erasmus"].forEach(k=>{ if(!Array.isArray(d[k])) d[k]=[]; }); if(!d.sn||typeof d.sn!=="object") d.sn={}; return d; }
+  const bugun=()=>todayISO();
+  const nowHM=()=>{ const d=new Date(), p=n=>String(n).padStart(2,"0"); return p(d.getHours())+p(d.getMinutes()); };
+  const sure=sn=>{ sn=Math.max(0,Math.round(sn)); return String(Math.floor(sn/60)).padStart(2,"0")+":"+String(sn%60).padStart(2,"0"); };
+  const kelimeSay=t=>(String(t).trim().match(/\S+/g)||[]).length;
+
+  /* ---------- veri: Writing Task 1 / Task 2 ---------- */
+  const T1=[
+    {t:"Home internet access",tip:"Tablo",bas:["Region","2005","2015","2025"],sat:[["Northland",32,68,91],["Eastvale",18,52,84],["Southport",41,77,95],["Westmere",12,39,73]],
+      q:"The table shows the percentage of households with home internet access in four regions in 2005, 2015 and 2025. Summarise the information by selecting and reporting the main features, and make comparisons where relevant."},
+    {t:"Travel to work",tip:"Tablo",bas:["Method","1995","2025"],sat:[["Car",62,41],["Bus",18,15],["Train",9,17],["Bicycle",4,12],["Walking",6,8],["Work from home",1,7]],
+      q:"The table shows the main method of travel to work in one city in 1995 and 2025 (percentage of workers). Summarise the information by selecting and reporting the main features, and make comparisons where relevant."},
+    {t:"Electricity by source",tip:"Tablo",bas:["Source","2000","2020"],sat:[["Coal",44,19],["Natural gas",23,31],["Nuclear",19,17],["Wind and solar",3,24],["Hydropower",11,9]],
+      q:"The table shows the share of electricity produced from five sources in one country in 2000 and 2020 (percentage). Summarise the information by selecting and reporting the main features, and make comparisons where relevant."},
+    {t:"Household spending",tip:"Tablo",bas:["Category","Young adults (18–29)","Families with children"],sat:[["Housing",820,1150],["Food",310,640],["Transport",240,330],["Leisure",280,160],["Education",90,270]],
+      q:"The table shows the average monthly spending (in US dollars) of two types of household on five categories. Summarise the information by selecting and reporting the main features, and make comparisons where relevant."},
+    {t:"Museum visitors",tip:"Tablo",bas:["Museum","2020","2021","2022","2023","2024"],sat:[["City Art Museum",210,95,240,310,355],["Science Centre",330,120,290,420,460],["History Museum",180,140,200,215,190]],
+      q:"The table shows the number of visitors (in thousands) to three museums between 2020 and 2024. Summarise the information by selecting and reporting the main features, and make comparisons where relevant."},
+    {t:"Recycling plastic bottles",tip:"Süreç",adim:["Used bottles are collected from households and recycling points","Bottles are sorted by type and colour","Caps and labels are removed","Bottles are washed and shredded into small flakes","Flakes are melted and pushed through a filter","The melted plastic is cooled and cut into pellets","Pellets are sold to factories to make new bottles, fibre or packaging"],
+      q:"The diagram shows the stages in recycling plastic bottles. Summarise the information by selecting and reporting the main features, and make comparisons where relevant."}
+  ];
+  const T2=[
+    "Some people believe that studying abroad gives students more benefits than studying in their own country. To what extent do you agree or disagree?",
+    "In many cities, traffic congestion is getting worse. What are the causes of this problem, and what measures could be taken to reduce it?",
+    "Some people think governments should spend money on public transport, while others believe building more roads is a better solution. Discuss both views and give your own opinion.",
+    "More and more people now work from home. What are the advantages and disadvantages of this trend for employees and for employers?",
+    "Young people today spend a large amount of time on social media. Do the disadvantages of this outweigh the advantages?",
+    "Some people say that learning English is essential for a successful career, while others disagree. Discuss both views and give your own opinion.",
+    "Fast food is becoming more and more popular around the world. Why is this the case, and is it a positive or negative development?",
+    "Museums and historical sites should be free for everyone. To what extent do you agree or disagree?",
+    "Some people prefer to save their money for the future, while others spend everything on enjoying life today. Discuss both views and give your own opinion.",
+    "In some countries, young people are encouraged to do volunteer work. Is this a good idea? Should it be compulsory?"
+  ];
+  /* ---------- veri: Speaking ---------- */
+  const SP=[
+    {k:"Hometown",p1:["Where is your hometown, and what is it known for?","What do you like most about living there?","Has your hometown changed much since you were a child?","Would you like to live there in the future? Why or why not?"],
+      c:{t:"Describe a place in your country that you would recommend to a visitor.",b:["where it is","how you can get there","what visitors can do there","and explain why you would recommend it"]},
+      p3:["Why do some people prefer living in a small town rather than a big city?","How has tourism changed the places people visit?","Should governments protect old buildings, or build new ones?","What makes a city a good place for young people?"]},
+    {k:"Studies and work",p1:["Do you work or are you a student?","What do you enjoy most about your studies or job?","Is there anything you find difficult about it?","What would you like to do in the future?"],
+      c:{t:"Describe a skill that you learned and that was useful to you.",b:["what the skill is","when and how you learned it","who taught you or helped you","and explain why it has been useful"]},
+      p3:["Which skills are most important for young people today?","Is it better to learn skills at school or at work?","How will technology change the jobs people do?","Why do some people change careers many times?"]},
+    {k:"Free time",p1:["What do you usually do in your free time?","Do you prefer spending free time alone or with other people?","Is there a hobby you would like to try?","How much free time do you have during the week?"],
+      c:{t:"Describe an activity you enjoy doing in your free time.",b:["what the activity is","when and where you do it","who you do it with","and explain why you enjoy it"]},
+      p3:["Why do many people today feel they do not have enough free time?","Do people spend their free time differently from the way their grandparents did?","Should companies give employees more time off?","Is it important for children to have hobbies?"]},
+    {k:"Technology",p1:["How often do you use your phone?","What apps do you use most?","Do you think you spend too much time online?","Can you remember the first time you used a computer?"],
+      c:{t:"Describe a piece of technology that you find useful.",b:["what it is","how often you use it","what you use it for","and explain why it is useful to you"]},
+      p3:["How has technology changed the way people communicate?","Are there any disadvantages to relying on technology?","Should children be allowed to use smartphones at school?","What technology do you think will be common in twenty years?"]},
+    {k:"Food",p1:["What kind of food do you enjoy most?","Do you prefer to eat at home or in restaurants?","Can you cook? What can you make?","Has your diet changed in recent years?"],
+      c:{t:"Describe a meal that you remember well.",b:["when and where you had it","who you had it with","what you ate","and explain why you remember it"]},
+      p3:["Why are some people interested in healthy eating while others are not?","How has the way people buy food changed?","Should schools teach students how to cook?","Do traditional dishes matter in a modern world?"]},
+    {k:"Travel",p1:["Do you like travelling?","What was the last place you visited?","Do you prefer travelling alone or with others?","What would be your dream holiday?"],
+      c:{t:"Describe a journey that you enjoyed.",b:["where you went","how you travelled","who you went with","and explain why you enjoyed the journey"]},
+      p3:["Why do people like to visit other countries?","What are the advantages and disadvantages of group tours?","How does tourism affect local communities?","Will people travel more or less in the future?"]},
+    {k:"Friends",p1:["Do you have many friends?","How often do you see your friends?","What do you usually do together?","Is it easy for you to make new friends?"],
+      c:{t:"Describe a friend who is important to you.",b:["who this person is","how you met","what you like to do together","and explain why this friend is important to you"]},
+      p3:["What qualities make someone a good friend?","Do people make friends more easily when they are young?","Has social media changed friendship?","Is it better to have a few close friends or many casual friends?"]},
+    {k:"Daily routine",p1:["What does your typical day look like?","Are you a morning person or a night person?","What is your favourite part of the day?","Would you like to change anything about your routine?"],
+      c:{t:"Describe a day when you were very busy.",b:["when it was","what you had to do","how you felt during the day","and explain why it was so busy"]},
+      p3:["Why do some people find it hard to manage their time?","Is a fixed daily routine good or bad for people?","How do work hours affect family life?","What could employers do to help people balance work and life?"]}
+  ];
+  const IDP=[
+    ["Ücretsiz IELTS deneme testleri (IDP)","https://ielts.idp.com/prepare/article-free-practice-tests","Tam ücretsiz deneme setleri — başlangıç ve tam deneme için."],
+    ["Listening soru örnekleri","https://ielts.idp.com/about/news-and-articles/article-free-listening-practice-questions","Listening soru türleri ve ücretsiz alıştırmalar."],
+    ["Speaking soru örnekleri","https://ielts.idp.com/about/news-and-articles/article-free-speaking-practice-questions","Part 1/2/3 örnek soruları."],
+    ["Academic Writing soru örnekleri","https://ielts.idp.com/about/news-and-articles/article-academic-writing-free-practice-questions","Task 1 ve Task 2 örnek soruları."],
+    ["Academic Reading soru örnekleri","https://ielts.idp.com/about/news-and-articles/article-academic-reading-free-practice-questions","Reading soru türleri ve alıştırmalar."],
+    ["Speaking band tanımları (descriptors)","https://ielts.idp.com/prepare/article-understanding-the-ielts-speaking-band-descriptors","Speaking puanlama ölçütleri: akıcılık, kelime, gramer, telaffuz."]
+  ];
+  window.IELTS_IDP=IDP;
+
+  /* ---------- beceri bazlı dakika (etkin süre: sekme görünür + son 90 sn içinde etkileşim) ---------- */
+  const SAYFA_BECERI={read:"reading",listen:"listening",write:"writing",speak:"speaking",vocab:"kelime_gramer",gram:"kelime_gramer",quiz:"kelime_gramer",transfer:"writing"};
+  let sonEtkin=Date.now(), bekleyen={}, sonYaz=Date.now();
+  ["pointerdown","keydown","scroll","touchstart","mousemove"].forEach(ev=>addEventListener(ev,()=>{ sonEtkin=Date.now(); },{passive:true,capture:true}));
+  const aktifBeceri=()=>{ const on=document.querySelector(".page.on"), id=on?on.id.replace("p-",""):""; return id==="ielts"?(window.__ieltsBeceri||null):(SAYFA_BECERI[id]||null); };
+  function flush(){ const k=Object.keys(bekleyen); if(!k.length) return; const g=I().sn[bugun()]=I().sn[bugun()]||{};
+    k.forEach(x=>{ g[x]=(g[x]||0)+bekleyen[x]; }); bekleyen={}; sonYaz=Date.now(); saveState(); }
+  setInterval(()=>{ if(document.visibilityState!=="visible"||Date.now()-sonEtkin>90000) return; const b=aktifBeceri(); if(!b) return;
+    bekleyen[b]=(bekleyen[b]||0)+5; if(Date.now()-sonYaz>30000) flush(); },5000);
+  document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden") flush(); });
+  window.addEventListener("pagehide",flush);
+  const dkOf=o=>{ const r={}; BECERI.forEach(([k])=>{ r[k]=Math.round(((o||{})[k]||0)/60); }); return r; };
+
+  /* ---------- hata defteri ---------- */
+  const norm=s=>String(s||"").toLowerCase().replace(/\s+/g," ").trim();
+  const duz=h=>{ const t=document.createElement("div"); t.innerHTML=String(h||""); return t.textContent.replace(/\s+/g," ").trim(); };
+  function hataEkle(o){
+    const d=I(), hata=duz(o.hata).slice(0,240); if(!hata) return null;
+    const tur=TURLER.includes(o.tur)?o.tur:"diğer", var_=d.hatalar.find(x=>norm(x.hata)===norm(hata));
+    if(var_){ var_.n=(var_.n||1)+1; var_.son=bugun(); var_.asama=0; var_.due=addDays(bugun(),1); if(o.dogrusu) var_.dogrusu=duz(o.dogrusu).slice(0,240); saveState(); return var_; }
+    const y={id:Date.now()+Math.random(),tarih:bugun(),hata,dogrusu:duz(o.dogrusu).slice(0,240),tur,kaynak:o.kaynak||"elle",n:1,son:bugun(),asama:0,due:addDays(bugun(),1)};
+    d.hatalar.push(y); if(d.hatalar.length>500) d.hatalar=d.hatalar.slice(-500); saveState(); return y; }
+  const kuyruk=()=>I().hatalar.filter(x=>x.due&&x.due<=bugun()).sort((a,b)=>a.due<b.due?-1:1);
+  window.ieltsHataEkle=hataEkle;
+
+  /* ---------- IELTS band ---------- */
+  function bandHesap(l,r,w,s){ const v=[l,r,w,s].map(x=>x===""||x==null?NaN:+x); if(v.some(isNaN)) return null;
+    const a=v.reduce((p,c)=>p+c,0)/4, f=a-Math.floor(a); return Math.floor(a)+(f<.25?0:f<.75?.5:1); }
+
+  /* ---------- Markdown / dosya ---------- */
+  function yaziMd(y){
+    return `---\ntip: academy-yazi\ntarih: ${y.tarih}\nsaat: ${y.saat}\ntask: ${y.task}\nsure_dk: ${y.dk}\nhedef_dk: ${y.hedef_dk}\nkelime: ${y.kelime}\nmin_kelime: ${y.min_kelime}\nsure_asimi: ${y.sure_asimi?"evet":"hayır"}\n---\n# IELTS Writing Task ${y.task} — ${y.baslik}\n\n## Soru\n${y.soru}\n\n## Yazı (${y.kelime} kelime)\n${y.metin}\n`; }
+  function indir(ad,metin){ const u=URL.createObjectURL(new Blob([metin],{type:"text/markdown"})); const a=document.createElement("a"); a.href=u; a.download=ad; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),4000); }
+  const mdAd=y=>`akademi-yazi-${y.tarih}-${y.saat}-task${y.task}.md`;
+  async function yaziVault(y){ if(window.vaultDosya&&window.vaultGorunur&&vaultGorunur()){ const r=await vaultDosya(mdAd(y),yaziMd(y)); if(r===true||r==="iptal") return; } indir(mdAd(y),yaziMd(y)); toast("Markdown indirildi — Obsidian → raw/English/Academy Yedek klasörüne at",{kind:"info",ms:6000}); }
+  async function kopyala(t,msg){ try{ await navigator.clipboard.writeText(t); toast(msg||"Kopyalandı",{kind:"ok"}); }catch(e){ toast("Pano kullanılamadı",{kind:"err"}); } }
+
+  /* ---------- dışa aktarma ek alanları ---------- */
+  window.ieltsEk=function(){
+    flush(); const d=I(), sn=d.sn, gunluk={};
+    Object.keys(sn).sort().slice(-60).forEach(g=>{ gunluk[g]=dkOf(sn[g]); });
+    const oz={}; d.hatalar.forEach(x=>{ oz[x.tur]=(oz[x.tur]||0)+(x.n||1); });
+    return {
+      dakika_beceri:dkOf(sn[bugun()]), dakika_beceri_gunluk:gunluk,
+      ielts_denemeleri:d.denemeler.map(x=>({tarih:x.tarih,tur:x.tur,listening:x.listening,reading:x.reading,writing:x.writing,speaking:x.speaking,band:x.band,puan:x.puan==null?null:x.puan,ana_hata:x.ana_hata||"",not:x.not||"",kaynak:x.kaynak||""})),
+      erasmus_pratik:d.erasmus.slice(-30).map(x=>({tarih:x.tarih,puan:x.puan,dogru:x.dogru,toplam:x.toplam,gecme:60,gecti:x.puan>=60,sure_dk:x.sure_dk,bolumler:x.bolumler})),
+      hata_defteri:d.hatalar.map(x=>({tarih:x.tarih,hata:x.hata,dogrusu:x.dogrusu,tur:x.tur,n:x.n||1,kaynak:x.kaynak,son:x.son,due:x.due,asama:x.asama||0})),
+      hata_defteri_ozet:oz,
+      yazi_gonderimleri:d.yazilar.slice(-30).map(y=>({tarih:y.tarih,saat:y.saat,task:y.task,baslik:y.baslik,soru:y.soru,metin:y.metin,kelime:y.kelime,min_kelime:y.min_kelime,sure_dk:y.dk,hedef_dk:y.hedef_dk,sure_asimi:!!y.sure_asimi})),
+      speaking_oturumlari:d.konusma.slice(-60).map(x=>({tarih:x.tarih,part:x.part,konu:x.konu,sure_sn:x.sure_sn,soru_sayisi:x.soru_sayisi||null}))
+    }; };
+  const EK_ANAHTARLAR=["dakika_beceri","dakika_beceri_gunluk","ielts_denemeleri","erasmus_pratik","hata_defteri","hata_defteri_ozet","yazi_gonderimleri","speaking_oturumlari"];
+  window.ieltsEkAnahtarlar=EK_ANAHTARLAR;
+
+  /* ---------- sayfa iskeleti ---------- */
+  let TAB="ozet"; try{ TAB=sessionStorage.getItem("ielts_tab")||"ozet"; }catch(e){}
+  const TABS=[["ozet","Özet"],["deneme","Denemeler"],["writing","Writing"],["speaking","Speaking"],["erasmus","Erasmus pratik"],["hata","Hata defteri"],["kaynak","Kaynaklar"]];
+  const TAB_BECERI={writing:"writing",speaking:"speaking",erasmus:"kelime_gramer",hata:"kelime_gramer"};
+  let W=null, SPK=null, ER=null, ERSON=null, timer=null;
+  const btn=(id,txt,cls)=>`<button class="btn ${cls||""}" type="button" id="${id}">${txt}</button>`;
+  function sayfaCiz(){
+    const el=document.getElementById("p-ielts"); if(!el) return;
+    window.__ieltsBeceri=TAB_BECERI[TAB]||null;
+    el.innerHTML=`<div class="phead"><div><h1>IELTS Merkezi</h1>
+      <div class="sub">Deneme sonuçların, süreli Writing, Speaking kartları, Erasmus pratik sınavı ve hata defterin. Hedefler: IELTS 7.0 · Erasmus 70+ (geçme 60).</div></div></div>
+      <div class="row" id="ieTabs" style="gap:6px;flex-wrap:wrap;margin-bottom:16px">${TABS.map(([k,n])=>`<button type="button" class="fbtn ${k===TAB?"on":""}" data-t="${k}">${n}</button>`).join("")}</div>
+      <div id="ieBody"></div>`;
+    el.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{ TAB=b.dataset.t; try{ sessionStorage.setItem("ielts_tab",TAB); }catch(e){} sayfaCiz(); });
+    ({ozet:tOzet,deneme:tDeneme,writing:tWriting,speaking:tSpeaking,erasmus:tErasmus,hata:tHata,kaynak:tKaynak})[TAB](el.querySelector("#ieBody"));
+    if(!timer) timer=setInterval(tick,500);
+  }
+  RENDERERS.ielts=sayfaCiz;
+  function tick(){
+    if(!document.getElementById("p-ielts")||!document.getElementById("p-ielts").classList.contains("on")){ return; }
+    if(W&&document.getElementById("wTimer")) yazTick();
+    if(SPK&&document.getElementById("sTimer")) konusTick();
+    if(ER&&document.getElementById("erTimer")) erTick();
+  }
+
+  /* ---------- Özet ---------- */
+  function tOzet(b){
+    flush(); const d=I(), bu=dkOf(d.sn[bugun()]), toplam=Object.values(bu).reduce((a,c)=>a+c,0), maks=Math.max(30,...Object.values(bu));
+    const gunler=[...Array(7)].map((_,i)=>addDays(bugun(),i-6)).reverse(), son=d.denemeler.filter(x=>x.band!=null).sort((a,c)=>a.tarih<c.tarih?1:-1)[0], er=d.erasmus[d.erasmus.length-1];
+    b.innerHTML=`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:4px">Bugün · beceri bazlı dakika</h3>
+      <p class="hint" style="margin-bottom:10px">Sayfada etkin geçirdiğin süre (sekme açık ve hareket var) beceriye göre sayılır. Toplam <b>${toplam} dk</b>.</p>
+      ${BECERI.map(([k,n])=>`<div class="row" style="margin-bottom:6px"><span style="width:120px;font-size:13px">${n}</span><div class="bar" style="flex:1;margin:0"><i style="width:${Math.round(100*bu[k]/maks)}%"></i></div><span class="hint" style="width:54px;text-align:right">${bu[k]} dk</span></div>`).join("")}
+      <p class="hint" style="margin-top:8px">Listening, Reading, Writing, Speaking ve Kelime-Gramer sayfalarında ve bu merkezin Writing/Speaking/Erasmus/Hata sekmelerinde sayılır.</p></div>
+      <div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:8px">Son 7 gün (dk)</h3><div class="scroll"><table><tr><th>Gün</th>${BECERI.map(([k,n])=>`<th>${n.split("-")[0]}</th>`).join("")}<th>Toplam</th></tr>
+        ${gunler.map(g=>{ const x=dkOf(d.sn[g]); return `<tr><td>${g.slice(5)}</td>${BECERI.map(([k])=>`<td>${x[k]||"·"}</td>`).join("")}<td><b>${Object.values(x).reduce((a,c)=>a+c,0)}</b></td></tr>`; }).join("")}</table></div></div>
+      <div class="tiles" style="margin-bottom:16px">
+        <div class="tile"><div class="k">Son IELTS bandı</div><div class="v">${son?son.band.toFixed(1):"—"}</div><div class="m">${son?son.tur+" · "+son.tarih:"henüz deneme yok"}</div></div>
+        <div class="tile"><div class="k">Erasmus pratik</div><div class="v">${er?er.puan:"—"}</div><div class="m">${er?(er.puan>=60?"geçti":"geçemedi")+" · geçme 60":"50 soru · geçme 60"}</div></div>
+        <div class="tile"><div class="k">Hata kuyruğu</div><div class="v">${kuyruk().length}</div><div class="m">${d.hatalar.length} kayıt</div></div>
+        <div class="tile"><div class="k">Writing / Speaking</div><div class="v">${d.yazilar.length} / ${d.konusma.length}</div><div class="m">kayıt</div></div></div>`;
+  }
+
+  /* ---------- Denemeler ---------- */
+  function tDeneme(b){
+    const d=I(), puanSec=id=>`<select id="${id}" style="width:auto"><option value="">—</option>${Array.from({length:19},(_,i)=>i*.5).map(v=>`<option value="${v}">${v.toFixed(1)}</option>`).join("")}</select>`;
+    const liste=d.denemeler.slice().sort((a,c)=>a.tarih<c.tarih?1:-1), noktalar=liste.filter(x=>x.band!=null).reverse();
+    const svg=noktalar.length>1?(()=>{ const w=320,h=80,mn=Math.min(4,...noktalar.map(x=>x.band))-.25,mx=Math.max(7,...noktalar.map(x=>x.band))+.25, X=i=>10+i*(w-20)/(noktalar.length-1), Y=v=>h-8-(v-mn)/(mx-mn)*(h-16);
+      return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;max-width:${w}px"><line x1="10" x2="${w-10}" y1="${Y(7)}" y2="${Y(7)}" stroke="var(--green)" stroke-dasharray="3 3"/><text x="${w-12}" y="${Y(7)-3}" font-size="9" text-anchor="end" fill="var(--green)">hedef 7.0</text>
+        <polyline fill="none" stroke="var(--blue)" stroke-width="2" points="${noktalar.map((x,i)=>X(i)+","+Y(x.band)).join(" ")}"/>${noktalar.map((x,i)=>`<circle cx="${X(i)}" cy="${Y(x.band)}" r="3" fill="var(--blue)"/>`).join("")}</svg>`; })():"";
+    b.innerHTML=`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:8px">Deneme sonucu ekle</h3>
+      <div class="row" style="gap:12px;flex-wrap:wrap;align-items:flex-end">
+        <label>Tarih<br><input type="date" id="dnT" value="${bugun()}" style="width:auto"></label>
+        <label>Tür<br><select id="dnTur" style="width:auto">${DENEME_TURLERI.map(t=>`<option>${t}</option>`).join("")}</select></label>
+        <label>Listening<br>${puanSec("dnL")}</label><label>Reading<br>${puanSec("dnR")}</label><label>Writing<br>${puanSec("dnW")}</label><label>Speaking<br>${puanSec("dnS")}</label>
+        <label id="dnPuanK" style="display:none">Erasmus puanı (0-100)<br><input type="number" id="dnPuan" min="0" max="100" style="width:90px"></label></div>
+      <div class="row" style="gap:12px;flex-wrap:wrap;margin-top:10px"><label style="flex:1;min-width:220px">Ana hata<br><input type="text" id="dnHata" placeholder="örn. Task 2'de paragraf geçişleri zayıf"></label>
+        <label style="flex:1;min-width:220px">Kaynak / not<br><input type="text" id="dnNot" placeholder="örn. IDP free test 1"></label></div>
+      <p class="hint" id="dnBand" style="margin:10px 0">Dört puanı da girersen toplam band otomatik hesaplanır (IELTS yuvarlama kuralı).</p>
+      <div class="row">${btn("dnKaydet","Kaydet")}</div></div>
+      ${svg?`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:6px">Band gelişimi</h3>${svg}</div>`:""}
+      <div class="card"><h3 style="margin-bottom:8px">Denemeler (${liste.length})</h3>${liste.length?`<div class="scroll"><table><tr><th>Tarih</th><th>Tür</th><th>L</th><th>R</th><th>W</th><th>S</th><th>Band</th><th>Ana hata</th><th></th></tr>
+        ${liste.map(x=>`<tr><td>${x.tarih}</td><td>${E(x.tur)}</td><td>${x.listening??"·"}</td><td>${x.reading??"·"}</td><td>${x.writing??"·"}</td><td>${x.speaking??"·"}</td><td><b>${x.band!=null?x.band.toFixed(1):(x.puan!=null?x.puan+"/100":"·")}</b></td><td class="hint">${E(x.ana_hata||"")}</td><td><button class="btn ghost sm" data-del="${x.id}" type="button" aria-label="Sil">✕</button></td></tr>`).join("")}</table></div>`:`<p class="hint">Henüz deneme yok. Başlangıç denemeni (Listening + Reading tam, Writing Task 2, 3 speaking sorusu) yapınca buraya gir.</p>`}</div>`;
+    const q=s=>b.querySelector(s), al=()=>["#dnL","#dnR","#dnW","#dnS"].map(s=>q(s).value);
+    const guncelle=()=>{ q("#dnPuanK").style.display=q("#dnTur").value==="Erasmus pratik"?"":"none"; const bd=bandHesap(...al());
+      q("#dnBand").textContent=bd!=null?`Toplam band: ${bd.toFixed(1)}`:"Dört puanı da girersen toplam band otomatik hesaplanır (IELTS yuvarlama kuralı)."; };
+    ["#dnL","#dnR","#dnW","#dnS","#dnTur"].forEach(s=>q(s).onchange=guncelle); guncelle();
+    q("#dnKaydet").onclick=()=>{ const [l,r,w,s]=al(), tur=q("#dnTur").value, p=q("#dnPuan").value;
+      if(l===""&&r===""&&w===""&&s===""&&p===""){ toast("En az bir puan gir",{kind:"err"}); return; }
+      const n=v=>v===""?null:+v;
+      d.denemeler.push({id:Date.now(),tarih:q("#dnT").value||bugun(),tur,listening:n(l),reading:n(r),writing:n(w),speaking:n(s),band:bandHesap(l,r,w,s),puan:tur==="Erasmus pratik"&&p!==""?+p:null,ana_hata:q("#dnHata").value.trim(),not:q("#dnNot").value.trim(),kaynak:"elle"});
+      saveState(); toast("Deneme kaydedildi",{kind:"ok"}); sayfaCiz(); };
+    b.querySelectorAll("[data-del]").forEach(x=>x.onclick=async()=>{ if(window.askConfirm&&!(await askConfirm({title:"Bu deneme silinsin mi?",ok:"Sil",danger:true}))) return; d.denemeler=d.denemeler.filter(y=>String(y.id)!==x.dataset.del); saveState(); sayfaCiz(); });
+  }
+
+  /* ---------- Writing (Task 1: 20 dk ≥150 kelime · Task 2: 40 dk ≥250 kelime) ---------- */
+  const W_AYAR={1:{dk:20,min:150},2:{dk:40,min:250}};
+  let YSON=null;
+  const t1Govde=p=>p.tip==="Tablo"
+    ?`<div class="scroll" style="margin:10px 0"><table><tr>${p.bas.map(h=>`<th>${E(h)}</th>`).join("")}</tr>${p.sat.map(s=>`<tr>${s.map((c,i)=>`<td${i?"":" style='font-weight:600'"}>${E(c)}</td>`).join("")}</tr>`).join("")}</table></div>`
+    :`<ol style="margin:10px 0 10px 18px;line-height:1.7">${p.adim.map(a=>`<li>${E(a)}</li>`).join("")}</ol>`;
+  const t1Metin=p=>p.tip==="Tablo"?p.bas.join(" | ")+"\n"+p.sat.map(s=>s.join(" | ")).join("\n"):p.adim.map((a,i)=>`${i+1}. ${a}`).join("\n");
+  function yazBaslat(task){
+    const a=W_AYAR[task]; let i,p,baslik,soru,govde;
+    if(task===1){ i=Math.floor(Math.random()*T1.length); p=T1[i]; baslik=p.t; soru=p.q+"\n\n"+t1Metin(p); govde=`<p>${E(p.q)}</p>${t1Govde(p)}`; }
+    else { i=Math.floor(Math.random()*T2.length); baslik=T2[i].split(/[.?]/)[0].slice(0,70); soru=T2[i]+"\n\nGive reasons for your answer and include any relevant examples from your own knowledge or experience."; govde=`<p>${E(T2[i])}</p><p class="hint">Give reasons for your answer and include any relevant examples from your own knowledge or experience.</p>`; }
+    W={task,baslik,soru,govde,dk:a.dk,min:a.min,start:Date.now(),deadline:Date.now()+a.dk*60000,text:"",asildi:false}; sayfaCiz(); }
+  function tWriting(b){
+    const d=I();
+    if(W){ const wa=W; b.innerHTML=`<div class="card" style="margin-bottom:14px"><div class="row" style="justify-content:space-between;gap:10px;flex-wrap:wrap"><span class="eyebrow">Task ${wa.task} · ${wa.dk} dk · en az ${wa.min} kelime</span>
+        <span id="wTimer" style="font-family:var(--mono);font-size:26px;font-weight:600">--:--</span></div>
+        <div class="bar" style="margin:6px 0 10px"><i id="wBar" style="width:0%"></i></div><h3 style="margin-bottom:6px">${E(wa.baslik)}</h3>${wa.govde}</div>
+      <textarea id="wMetin" rows="18" placeholder="Yazmaya başla… (sayaç başladı)" style="width:100%;font-size:15px;line-height:1.6" spellcheck="false">${E(wa.text)}</textarea>
+      <div class="row" style="justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:8px"><span><b id="wSay">0</b> kelime <span class="chip" id="wChip"></span></span>
+        <span class="row" style="gap:8px">${btn("wVazgec","Vazgeç","ghost")}${btn("wBitir","Bitir ve kaydet","green")}</span></div>`;
+      const ta=b.querySelector("#wMetin"); ta.oninput=()=>{ wa.text=ta.value; yazTick(); };
+      b.querySelector("#wBitir").onclick=yazBitir;
+      b.querySelector("#wVazgec").onclick=async()=>{ if(window.askConfirm&&wa.text.trim()&&!(await askConfirm({title:"Yazı kaydedilmeden silinsin mi?",ok:"Evet, sil",danger:true}))) return; W=null; sayfaCiz(); };
+      yazTick(); ta.focus(); return; }
+    const gec=d.yazilar.slice(-8).reverse();
+    b.innerHTML=(YSON?yazSonuc(YSON):"")+`<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:16px">
+      ${[1,2].map(t=>`<div class="card"><span class="eyebrow">Task ${t}</span><h3 style="margin:4px 0">${W_AYAR[t].dk} dakika · en az ${W_AYAR[t].min} kelime</h3>
+        <p class="hint" style="margin-bottom:10px">${t===1?"Tablo ya da süreç özeti (Academic Task 1).":"Görüş / tartışma / çözüm yazısı (Task 2)."} Süre başlayınca durmaz.</p>${btn("wStart"+t,"Task "+t+" başlat")}</div>`).join("")}</div>
+      <div class="card"><h3 style="margin-bottom:6px">Yazılarım</h3><p class="hint" style="margin-bottom:8px">Değerlendirmeyi Claude vault tarafında yapar: yazıyı <b>Vault'a gönder</b> ile ver ya da Markdown'ı kopyala.</p>
+        ${gec.length?gec.map(y=>`<div class="row" style="justify-content:space-between;gap:8px;flex-wrap:wrap;padding:7px 0;border-top:1px solid var(--edge)"><span style="font-size:13px"><b>Task ${y.task}</b> · ${y.tarih} ${y.saat.slice(0,2)}:${y.saat.slice(2)} · ${y.kelime} kelime · ${y.dk} dk${y.sure_asimi?" · süre aşıldı":""}<br><span class="hint">${E(y.baslik)}</span></span>
+          <span class="row" style="gap:6px"><button class="btn ghost sm" data-yc="${y.id}" type="button">Kopyala</button><button class="btn ghost sm" data-yv="${y.id}" type="button">${window.vaultGorunur&&vaultGorunur()?"Vault'a gönder":"İndir (.md)"}</button></span></div>`).join(""):`<p class="hint">Henüz yazı yok.</p>`}</div>`;
+    [1,2].forEach(t=>{ const x=b.querySelector("#wStart"+t); if(x) x.onclick=()=>{ YSON=null; yazBaslat(t); }; });
+    const bul=id=>d.yazilar.find(y=>String(y.id)===id);
+    b.querySelectorAll("[data-yc]").forEach(x=>x.onclick=()=>kopyala(yaziMd(bul(x.dataset.yc)),"Markdown kopyalandı"));
+    b.querySelectorAll("[data-yv]").forEach(x=>x.onclick=()=>yaziVault(bul(x.dataset.yv)));
+    const sy=b.querySelector("#ySonV"); if(sy) sy.onclick=()=>yaziVault(YSON);
+    const sc=b.querySelector("#ySonC"); if(sc) sc.onclick=()=>kopyala(yaziMd(YSON),"Markdown kopyalandı");
+    const sk=b.querySelector("#ySonK"); if(sk) sk.onclick=()=>{ YSON=null; sayfaCiz(); };
+  }
+  const yazSonuc=y=>`<div class="card" style="margin-bottom:16px;border-left:4px solid var(--green)"><h3 style="margin-bottom:4px">✓ Task ${y.task} kaydedildi</h3>
+    <p style="margin-bottom:8px"><b>${y.kelime}</b> kelime ${y.kelime>=y.min_kelime?`<span class="chip" style="color:var(--green);border-color:var(--green)">≥ ${y.min_kelime} ✓</span>`:`<span class="chip" style="color:var(--red);border-color:var(--red)">${y.min_kelime} altında</span>`} · ${y.dk} dk / ${y.hedef_dk} dk${y.sure_asimi?" · süre aşıldı":""}</p>
+    <p class="hint" style="margin-bottom:10px">Yazıyı vault'a ver; değerlendirme (görev, tutarlılık, kelime, gramer) Claude tarafında yapılır. Hataları Hata defterine eklemeyi unutma.</p>
+    <div class="row" style="gap:8px;flex-wrap:wrap">${btn("ySonV",window.vaultGorunur&&vaultGorunur()?"Vault'a gönder":"Markdown indir")}${btn("ySonC","Markdown kopyala","ghost")}${btn("ySonK","Kapat","ghost")}</div></div>`;
+  function yazTick(){
+    if(!W) return; const rem=W.deadline-Date.now(), t=document.getElementById("wTimer"); if(!t) return;
+    const n=kelimeSay(W.text), say=document.getElementById("wSay"), chip=document.getElementById("wChip"), bar=document.getElementById("wBar");
+    if(rem<=0){ W.asildi=true; t.textContent="00:00"; t.style.color="var(--red)"; } else { t.textContent=sure(rem/1000); t.style.color=rem<60000?"var(--red)":""; }
+    if(bar) bar.style.width=Math.min(100,100*(1-Math.max(0,rem)/(W.dk*60000)))+"%";
+    if(say) say.textContent=n; if(chip){ const ok=n>=W.min; chip.textContent=ok?`≥ ${W.min} ✓`:`${W.min-n} kelime eksik`; chip.style.color=ok?"var(--green)":"var(--muted)"; chip.style.borderColor=ok?"var(--green)":""; }
+  }
+  function yazBitir(){
+    if(!W) return; const n=kelimeSay(W.text); if(n<10){ toast("Önce yaz (en az 10 kelime)",{kind:"err"}); return; }
+    const t=new Date(), p2=x=>String(x).padStart(2,"0"), kul=Math.round((Date.now()-W.start)/6000)/10;
+    const y={id:Date.now(),tarih:bugun(),saat:p2(t.getHours())+p2(t.getMinutes()),task:W.task,baslik:W.baslik,soru:W.soru,metin:W.text.trim(),kelime:n,min_kelime:W.min,dk:kul,hedef_dk:W.dk,sure_asimi:Date.now()>W.deadline+5000};
+    I().yazilar.push(y); if(I().yazilar.length>120) I().yazilar=I().yazilar.slice(-120); try{ addXP(10); }catch(e){} saveState(); YSON=y; W=null; sayfaCiz(); }
+
+  /* ---------- Speaking (Part 1/2/3 kartları) ---------- */
+  function tSpeaking(b){
+    if(SPK) return konusEkran(b);
+    const gec=I().konusma.slice(-6).reverse();
+    b.innerHTML=`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:6px">Konu seç ve başla</h3>
+      <p class="hint" style="margin-bottom:10px">Sesi telefonun ses kaydedicisiyle kaydet (vault'ta Whisper yazıya çevirir); istersen aşağıdaki kayıt düğmesini de kullanabilirsin.</p>
+      <div class="row" style="gap:10px;flex-wrap:wrap;margin-bottom:12px"><label>Konu <select id="spKonu" style="width:auto"><option value="-1">Rastgele</option>${SP.map((s,i)=>`<option value="${i}">${s.k}</option>`).join("")}</select></label></div>
+      <div class="row" style="gap:8px;flex-wrap:wrap">${btn("spP1","Part 1 · Tanışma soruları")}${btn("spP2","Part 2 · Konuşma kartı (1 dk hazırlık + 2 dk)")}${btn("spP3","Part 3 · Tartışma soruları")}</div></div>
+      <div class="card"><h3 style="margin-bottom:6px">Son oturumlar</h3>${gec.length?gec.map(x=>`<div class="hint" style="padding:4px 0">${x.tarih} · Part ${x.part} · ${E(x.konu)} · ${sure(x.sure_sn)}</div>`).join(""):`<p class="hint">Henüz oturum yok.</p>`}</div>`;
+    [1,2,3].forEach(pt=>{ b.querySelector("#spP"+pt).onclick=()=>{ let k=+b.querySelector("#spKonu").value; if(k<0) k=Math.floor(Math.random()*SP.length);
+      SPK={part:pt,k,i:0,start:Date.now(),faz:pt===2?"prep":"qa",deadline:pt===2?Date.now()+60000:0}; sayfaCiz(); }; });
+  }
+  function konusEkran(b){
+    const s=SP[SPK.k], pt=SPK.part, qs=pt===1?s.p1:s.p3;
+    const govde=pt===2?`<div class="sheet" style="margin-bottom:12px"><span class="eyebrow">Part 2 · ${E(s.k)}</span><h2 style="margin:6px 0">${E(s.c.t)}</h2><p class="hint" style="margin-bottom:4px">You should say:</p><ul style="margin:0 0 0 18px;line-height:1.8">${s.c.b.map(x=>`<li>${E(x)}</li>`).join("")}</ul></div>
+        <p id="sFaz" style="font-weight:600;margin-bottom:6px"></p>`
+      :`<div class="sheet" style="margin-bottom:12px"><span class="eyebrow">Part ${pt} · ${E(s.k)} · soru ${SPK.i+1}/${qs.length}</span><h2 style="margin:8px 0">${E(qs[SPK.i])}</h2></div>`;
+    b.innerHTML=`<div class="card"><div class="row" style="justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px"><span class="hint">${pt===2?"Hazırlık 1 dk, sonra 2 dk konuş":"Her soruya 20-30 sn cevap ver"}</span><span id="sTimer" style="font-family:var(--mono);font-size:26px;font-weight:600">00:00</span></div>
+      ${pt===2?`<div class="bar" style="margin:0 0 10px"><i id="sBar" style="width:0%"></i></div>`:""}${govde}
+      <div class="row" style="gap:8px;flex-wrap:wrap">${pt===2?btn("sAtla","Hazırlığı bitir, konuşmaya geç","ghost"):(SPK.i<qs.length-1?btn("sSonraki","Sonraki soru →"):"")}
+        <button class="btn ghost" type="button" id="sesKayit">🎙 Sesimi kaydet</button>${btn("sBitir","Oturumu bitir","green")}${btn("sIptal","Vazgeç","ghost")}</div><div id="sesOynat"></div></div>`;
+    const sn=b.querySelector("#sSonraki"); if(sn) sn.onclick=()=>{ SPK.i++; sayfaCiz(); };
+    const at=b.querySelector("#sAtla"); if(at) at.onclick=()=>{ SPK.faz="speak"; SPK.deadline=Date.now()+120000; try{ sfx("ok",true); }catch(e){} konusTick(); };
+    b.querySelector("#sBitir").onclick=()=>{ I().konusma.push({tarih:bugun(),part:pt,konu:s.k,sure_sn:Math.round((Date.now()-SPK.start)/1000),soru_sayisi:pt===2?null:SPK.i+1}); saveState();
+      try{ addXP(5); }catch(e){} toast("Oturum kaydedildi",{kind:"ok"}); SPK=null; sayfaCiz(); };
+    b.querySelector("#sIptal").onclick=()=>{ SPK=null; sayfaCiz(); };
+    if(window.sesKayitBagla) sesKayitBagla(b);
+    konusTick();
+  }
+  function konusTick(){
+    if(!SPK) return; const t=document.getElementById("sTimer"); if(!t) return;
+    if(SPK.part!==2){ t.textContent=sure((Date.now()-SPK.start)/1000); return; }
+    const rem=SPK.deadline-Date.now(), faz=document.getElementById("sFaz"), bar=document.getElementById("sBar"), tam=SPK.faz==="prep"?60000:120000;
+    if(rem<=0&&SPK.faz==="prep"){ SPK.faz="speak"; SPK.deadline=Date.now()+120000; try{ sfx("ok",true); }catch(e){} return; }
+    if(rem<=0&&SPK.faz==="speak"&&!SPK.bitti){ SPK.bitti=true; try{ sfx("done",true); }catch(e){} }
+    t.textContent=sure(Math.max(0,rem)/1000); t.style.color=SPK.faz==="speak"?"var(--green)":"";
+    if(bar) bar.style.width=Math.min(100,100*(1-Math.max(0,rem)/tam))+"%";
+    if(faz) faz.textContent=SPK.faz==="prep"?"Hazırlık — notlarını kâğıda al (1 dk)":(rem<=0?"Süre bitti — konuşmayı tamamla":"Şimdi konuş (en fazla 2 dk)");
+    const at=document.getElementById("sAtla"); if(at&&SPK.faz==="speak") at.style.display="none";
+  }
+
+  /* ---------- Erasmus pratik: 50 soru · her soru 2 puan · geçme 60 ---------- */
+  const GECME=60, HEDEF=70;
+  const erOk=q=>!!q&&["mc","head","tf","gap"].includes(q.t)&&!!q.q&&q.a!=null&&(q.t==="gap"||q.t==="tf"||(Array.isArray(q.o)&&q.o.length>=2&&typeof q.a==="number"));
+  function erKur(){
+    const gram=shuffle(allGrammarQuestions().filter(erOk));
+    const havuz=DICT_LIST.filter(x=>x.tr&&x.tr!=="—"&&/^[a-z][a-z' -]{2,}$/.test(x.word));
+    const vocab=shuffle(havuz).slice(0,15).map(dd=>{ const o=shuffle([dd.tr,...shuffle(havuz.filter(x=>x.tr!==dd.tr)).slice(0,3).map(x=>x.tr)]);
+      return {q:{t:"mc",q:`"${dd.word}" ne demek?`,o,a:o.indexOf(dd.tr),why:`${dd.word} = ${dd.tr}. ${dd.en||""}`},bolum:"Kelime"}; });
+    const R=shuffle(READINGS.filter(r=>["B1","B2"].includes(r.lv)&&(r.q||[]).filter(erOk).length>=5)).slice(0,2);
+    const pasajlar=R.map(r=>({baslik:r.t,metin:(r.p||[]).map(x=>x[0]).join("\n\n")})), rq=[];
+    R.forEach((r,pi)=>{ (r.q||[]).filter(erOk).slice(0,pi===0?8:7).forEach(q=>rq.push({q,bolum:"Reading",pas:pi})); });
+    const kalan=50-vocab.length-rq.length, g=gram.slice(0,Math.max(20,kalan)).map(q=>({q,bolum:"Grammar"}));
+    return {sorular:[...g,...vocab,...rq].slice(0,50),pasajlar}; }
+  function erBaslat(dk){ const k=erKur(); ER={sorular:k.sorular,pasajlar:k.pasajlar,ans:{},baslangic:Date.now(),deadline:Date.now()+dk*60000,dk}; ERSON=null; sayfaCiz(); }
+  const erDogru=(q,a)=>{ if(a==null||a==="") return false;
+    if(q.t==="gap"){ const g=x=>String(x).toLowerCase().replace(/[’‘`´]/g,"'").replace(/\s+/g," ").replace(/[.!?]+$/,"").trim(); return (Array.isArray(q.a)?q.a:[q.a]).concat(q.alt||[]).map(g).includes(g(a)); }
+    return a===q.a; };
+  const erAnsMetin=(q,a)=>{ if(a==null||a==="") return "(boş)"; if(q.t==="mc"||q.t==="head") return String.fromCharCode(65+a)+") "+(q.o[a]||""); if(q.t==="tf") return ({T:"TRUE",F:"FALSE",NG:"NOT GIVEN"})[a]||a; return String(a); };
+  function tErasmus(b){
+    if(ER) return erSinav(b);
+    const d=I(), gec=d.erasmus.slice(-6).reverse();
+    b.innerHTML=(ERSON?erSonuc(ERSON):"")+`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:4px">Erasmus pratik sınavı</h3>
+      <p class="hint" style="margin-bottom:10px">50 soru (gramer, kelime ve 2 reading metni karışık), her soru 2 puan, toplam 100. <b>Geçme çizgisi ${GECME}</b>, hedefin <b>${HEDEF}+</b>. Cevaplar sınav bitene kadar gösterilmez; yanlışların Hata defterine ve zayıf nokta kayıtlarına eklenir. Gerçek sınavın süresi belli olunca buradan ayarla.</p>
+      <div class="row" style="gap:10px;flex-wrap:wrap;align-items:center"><label>Süre <select id="erSure" style="width:auto"><option value="45">45 dk</option><option value="60" selected>60 dk</option><option value="75">75 dk</option></select></label>${btn("erBasla","Sınavı başlat")}</div></div>
+      <div class="card"><h3 style="margin-bottom:6px">Geçmiş denemeler</h3>${gec.length?`<div class="scroll"><table><tr><th>Tarih</th><th>Puan</th><th>Doğru</th><th>Süre</th><th>Durum</th></tr>${gec.map(x=>`<tr><td>${x.tarih}</td><td><b>${x.puan}</b>/100</td><td>${x.dogru}/${x.toplam}</td><td>${x.sure_dk} dk</td><td>${x.puan>=HEDEF?"hedefte":x.puan>=GECME?"geçti":"geçemedi"}</td></tr>`).join("")}</table></div>`:`<p class="hint">Henüz deneme yok.</p>`}</div>`;
+    b.querySelector("#erBasla").onclick=()=>erBaslat(+b.querySelector("#erSure").value);
+    const k=b.querySelector("#erKapat"); if(k) k.onclick=()=>{ ERSON=null; sayfaCiz(); };
+  }
+  function erSinav(b){
+    const e=ER; let htm="", sonPas=-2, bolum="";
+    e.sorular.forEach((s,i)=>{
+      if(s.bolum!==bolum){ bolum=s.bolum; htm+=`<h3 style="margin:22px 0 8px">${bolum==="Grammar"?"Bölüm 1 · Gramer":bolum==="Kelime"?"Bölüm 2 · Kelime":"Bölüm 3 · Reading"}</h3>`; }
+      if(s.bolum==="Reading"&&s.pas!==sonPas){ sonPas=s.pas; const p=e.pasajlar[s.pas]; htm+=`<div class="card" style="margin:10px 0"><span class="eyebrow">Metin ${s.pas+1}</span><h4 style="margin:4px 0 6px">${E(p.baslik)}</h4><div style="max-height:260px;overflow:auto;font-size:14px;line-height:1.65;white-space:pre-wrap">${E(p.metin)}</div></div>`; }
+      const q=s.q; let govde="";
+      if(q.t==="mc"||q.t==="head") govde=q.o.map((o,oi)=>`<label style="display:flex;gap:8px;align-items:flex-start;padding:7px 10px;border:1px solid var(--edge);border-radius:8px;margin:5px 0;cursor:pointer"><input type="radio" name="er${i}" value="${oi}" style="width:auto;margin-top:3px"><span>${String.fromCharCode(65+oi)}) ${o}</span></label>`).join("");
+      else if(q.t==="tf"){ const uc=e.sorular.some(x=>x.q.a==="NG"&&x.pas===s.pas&&s.bolum==="Reading"); govde=(uc?[["T","TRUE"],["F","FALSE"],["NG","NOT GIVEN"]]:[["T","True"],["F","False"]]).map(([v,l])=>`<label style="display:inline-flex;gap:6px;align-items:center;padding:7px 12px;border:1px solid var(--edge);border-radius:8px;margin:5px 6px 5px 0;cursor:pointer"><input type="radio" name="er${i}" value="${v}" style="width:auto">${l}</label>`).join(""); }
+      else govde=`<input type="text" data-g="${i}" placeholder="cevabını yaz…" style="width:240px">`;
+      htm+=`<div class="q" style="margin-bottom:14px"><div class="qh"><span class="qn">${i+1}</span><span class="qt">${q.q}</span></div><div class="body" style="margin-left:21px">${govde}</div></div>`;
+    });
+    b.innerHTML=`<div class="card" style="position:sticky;top:8px;z-index:6;margin-bottom:12px"><div class="row" style="justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><span><b id="erSay">0</b>/50 cevaplandı</span>
+      <span id="erTimer" style="font-family:var(--mono);font-size:24px;font-weight:600">--:--</span><span class="row" style="gap:8px">${btn("erIptal","Vazgeç","ghost")}${btn("erBitir","Sınavı bitir","green")}</span></div></div>${htm}
+      <div class="row" style="margin-top:10px">${btn("erBitir2","Sınavı bitir","green")}</div>`;
+    const say=()=>{ document.getElementById("erSay").textContent=Object.keys(e.ans).filter(k=>e.ans[k]!=null&&e.ans[k]!=="").length; };
+    b.querySelectorAll("input[type=radio]").forEach(r=>r.onchange=()=>{ const i=+r.name.slice(2), q=e.sorular[i].q; e.ans[i]=(q.t==="tf")?r.value:+r.value; say(); });
+    b.querySelectorAll("input[data-g]").forEach(r=>r.oninput=()=>{ e.ans[+r.dataset.g]=r.value; say(); });
+    Object.keys(e.ans).forEach(k=>{ const q=e.sorular[k].q, v=e.ans[k]; if(q.t==="gap"){ const x=b.querySelector(`[data-g="${k}"]`); if(x) x.value=v; } else { const x=b.querySelector(`input[name="er${k}"][value="${v}"]`); if(x) x.checked=true; } });
+    say();
+    const bitir=async()=>{ const bos=50-Object.keys(e.ans).filter(k=>e.ans[k]!=null&&e.ans[k]!=="").length;
+      if(bos&&window.askConfirm&&!(await askConfirm({title:"Sınav bitirilsin mi?",msg:`${bos} soru boş. Boşlar yanlış sayılır.`,ok:"Bitir"}))) return; erBitir(); };
+    b.querySelector("#erBitir").onclick=bitir; b.querySelector("#erBitir2").onclick=bitir;
+    b.querySelector("#erIptal").onclick=async()=>{ if(window.askConfirm&&!(await askConfirm({title:"Sınav iptal edilsin mi?",msg:"Cevapların kaydedilmez.",ok:"İptal et",danger:true}))) return; ER=null; sayfaCiz(); };
+    erTick();
+  }
+  function erTick(){
+    if(!ER) return; const rem=ER.deadline-Date.now(), t=document.getElementById("erTimer"); if(!t) return;
+    t.textContent=sure(Math.max(0,rem)/1000); t.style.color=rem<300000?"var(--red)":"";
+    if(rem<=0){ toast("Süre doldu — sınav bitirildi",{kind:"info"}); erBitir(); } }
+  function erBitir(){
+    const e=ER; if(!e) return; ER=null;
+    const bol={Grammar:{d:0,t:0},Kelime:{d:0,t:0},Reading:{d:0,t:0}}, yanlis=[], pfx={Grammar:"gram-er",Kelime:"quiz-er",Reading:"read-er"}, tur={Grammar:"gramer",Kelime:"kelime",Reading:"okuma"};
+    e.sorular.forEach((s,i)=>{ const a=e.ans[i], ok=erDogru(s.q,a); bol[s.bolum].t++; if(ok) bol[s.bolum].d++;
+      try{ recordAnswer(Object.assign({},s.q,{_topic:"Erasmus pratik · "+s.bolum}),ok,pfx[s.bolum]); }catch(x){}
+      if(!ok){ yanlis.push({i,q:s.q,bolum:s.bolum,ans:erAnsMetin(s.q,a),dogru:correctText(s.q)});
+        hataEkle({hata:`${s.q.q} → cevabın: ${erAnsMetin(s.q,a)}`,dogrusu:correctText(s.q),tur:tur[s.bolum],kaynak:"erasmus"}); } });
+    const toplam=e.sorular.length, dogru=toplam-yanlis.length, puan=Math.round(dogru/toplam*100), sure_dk=Math.round((Math.min(Date.now(),e.deadline+3000)-e.baslangic)/6000)/10;
+    const zayif=Object.entries(bol).filter(([k,v])=>v.t).sort((a,c)=>a[1].d/a[1].t-c[1].d/c[1].t)[0];
+    const bolumler=Object.fromEntries(Object.entries(bol).map(([k,v])=>[k,`${v.d}/${v.t}`]));
+    const d=I(); d.erasmus.push({tarih:bugun(),puan,dogru,toplam,sure_dk,bolumler});
+    d.denemeler.push({id:Date.now(),tarih:bugun(),tur:"Erasmus pratik",listening:null,reading:null,writing:null,speaking:null,band:null,puan,ana_hata:zayif?`en zayıf bölüm: ${zayif[0]}`:"",not:`${dogru}/${toplam} · ${sure_dk} dk`,kaynak:"erasmus-modu"});
+    try{ addXP(Math.max(5,Math.round(dogru/2))); }catch(x){} saveState();
+    ERSON={puan,dogru,toplam,sure_dk,bol,yanlis,gecti:puan>=GECME}; sayfaCiz(); }
+  const erSonuc=r=>`<div class="card" style="margin-bottom:16px;border-left:4px solid ${r.puan>=HEDEF?"var(--green)":r.gecti?"var(--gold)":"var(--red)"}"><span class="eyebrow">Erasmus pratik sonucu</span>
+    <h2 style="margin:4px 0">${r.puan} / 100 <span style="font-size:15px;color:var(--muted)">${r.puan>=HEDEF?"· hedefin üstünde":r.gecti?"· geçme çizgisinin üstünde ("+GECME+")":"· geçme çizgisinin altında ("+GECME+")"}</span></h2>
+    <p class="hint" style="margin-bottom:10px">${r.dogru}/${r.toplam} doğru · ${r.sure_dk} dk · ${Object.entries(r.bol).map(([k,v])=>`${k} ${v.d}/${v.t}`).join(" · ")}</p>
+    <p class="hint" style="margin-bottom:8px">Yanlışların Hata defterine (SRS kuyruğu) ve Zayıf Nokta kayıtlarına eklendi; sonuç Denemeler'e yazıldı.</p>
+    ${r.yanlis.length?`<h4 style="margin:12px 0 6px">Yanlışlar (${r.yanlis.length})</h4>${r.yanlis.map(y=>`<div class="errline"><div><span class="et">${y.i+1}</span><div class="hint">${y.bolum}</div></div><div><div style="font-size:13px">${y.q.q}</div><div class="hint" style="margin-top:4px"><b>Cevabın:</b> ${E(y.ans)} · <b>Doğru:</b> ${E(y.dogru)}</div>${y.q.why?`<div class="hint" style="margin-top:2px">${y.q.why}</div>`:""}</div></div>`).join("")}`:`<p>Hiç yanlış yok. 🎉</p>`}
+    <div class="row" style="margin-top:12px">${btn("erKapat","Kapat","ghost")}</div></div>`;
+
+  /* ---------- Hata defteri ---------- */
+  let HG=false;
+  function tHata(b){
+    const d=I(), kq=kuyruk(), oz={}; d.hatalar.forEach(x=>{ oz[x.tur]=(oz[x.tur]||0)+(x.n||1); });
+    const sirali=Object.entries(oz).sort((a,c)=>c[1]-a[1]), tepe=sirali[0]?sirali[0][1]:1, cur=kq[0];
+    const kart=cur?`<div class="sheet" style="margin-bottom:10px"><span class="eyebrow">${E(cur.tur)} · ${cur.n||1}× · aşama ${cur.asama||0}/${SRS_ARALIK.length}</span><h3 style="margin:8px 0">${E(cur.hata)}</h3>
+        ${HG?`<p style="margin:8px 0"><b>Doğrusu:</b> ${E(cur.dogrusu||"—")}</p><div class="row" style="gap:8px">${btn("hhBildim","Bildim","green")}${btn("hhBilemedim","Bilemedim","ghost")}</div>`:`<div class="row">${btn("hhGoster","Doğrusunu göster")}</div>`}</div>`
+      :`<p class="hint">Bugünlük tekrar kuyruğu boş.</p>`;
+    b.innerHTML=`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:4px">Bugünkü tekrar kuyruğu · ${kq.length}</h3><p class="hint" style="margin-bottom:8px">SRS aralıkları: ${SRS_ARALIK.join("-")} gün. Bildiysen aralık uzar, bilemediysen yarına döner.</p>${kart}</div>
+      <div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:8px">Hata ekle</h3>
+        <div class="row" style="gap:10px;flex-wrap:wrap"><label style="flex:2;min-width:240px">Hatalı kullanım<br><input type="text" id="hhH" placeholder="örn. He don't like it"></label><label style="flex:2;min-width:240px">Doğrusu<br><input type="text" id="hhD" placeholder="örn. He doesn't like it"></label>
+          <label>Tür<br><select id="hhT" style="width:auto">${TURLER.map(t=>`<option>${t}</option>`).join("")}</select></label></div>
+        <div class="row" style="margin-top:10px">${btn("hhEkle","Ekle")}</div></div>
+      <div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:8px">Türe göre (tekrar sayısıyla)</h3>${sirali.length?sirali.map(([t,n])=>`<div class="row" style="margin-bottom:5px"><span style="width:90px;font-size:13px">${t}</span><div class="bar" style="flex:1;margin:0"><i class="r" style="width:${Math.round(100*n/tepe)}%"></i></div><span class="hint" style="width:40px;text-align:right">${n}</span></div>`).join(""):`<p class="hint">Henüz kayıt yok.</p>`}
+        ${sirali.length?`<p class="hint" style="margin-top:6px">En sık 3 tür: <b>${sirali.slice(0,3).map(x=>x[0]).join(", ")}</b> — bunlara haftalık plan ayır.</p>`:""}</div>
+      <div class="card"><h3 style="margin-bottom:8px">Tekrar eden hatalar</h3>${d.hatalar.length?`<div class="scroll"><table><tr><th>Hata</th><th>Doğrusu</th><th>Tür</th><th>×</th><th>Sonraki</th><th></th></tr>
+        ${d.hatalar.slice().sort((a,c)=>(c.n||1)-(a.n||1)||(a.due<c.due?-1:1)).slice(0,40).map(x=>`<tr><td>${E(x.hata)}</td><td>${E(x.dogrusu||"")}</td><td>${E(x.tur)}</td><td><b>${x.n||1}</b></td><td class="hint">${x.due||""}</td><td><button class="btn ghost sm" data-hd="${x.id}" type="button" aria-label="Sil">✕</button></td></tr>`).join("")}</table></div>`:`<p class="hint">Yazı, speaking ve deneme hatalarını buraya ekle; Erasmus pratikteki yanlışlar otomatik gelir.</p>`}</div>`;
+    const q=s=>b.querySelector(s);
+    const gs=q("#hhGoster"); if(gs) gs.onclick=()=>{ HG=true; sayfaCiz(); };
+    const dene=ok=>{ const x=kuyruk()[0]; if(!x) return; if(ok){ x.asama=(x.asama||0)+1; x.due=addDays(bugun(),SRS_ARALIK[Math.min(x.asama,SRS_ARALIK.length-1)]); } else { x.asama=0; x.due=addDays(bugun(),1); }
+      x.son=bugun(); HG=false; saveState(); sayfaCiz(); };
+    const bi=q("#hhBildim"); if(bi) bi.onclick=()=>dene(true); const bm=q("#hhBilemedim"); if(bm) bm.onclick=()=>dene(false);
+    q("#hhEkle").onclick=()=>{ const h=q("#hhH").value.trim(); if(!h){ toast("Hatalı kullanımı yaz",{kind:"err"}); return; } const onceki=d.hatalar.length, y=hataEkle({hata:h,dogrusu:q("#hhD").value,tur:q("#hhT").value,kaynak:"elle"});
+      toast(d.hatalar.length===onceki?`Bu hata zaten vardı — sayısı ${y.n}× oldu`:"Hata eklendi",{kind:"ok"}); sayfaCiz(); };
+    b.querySelectorAll("[data-hd]").forEach(x=>x.onclick=()=>{ d.hatalar=d.hatalar.filter(y=>String(y.id)!==x.dataset.hd); saveState(); sayfaCiz(); });
+  }
+
+  /* ---------- Kaynaklar ---------- */
+  function tKaynak(b){
+    b.innerHTML=`<div class="card"><h3 style="margin-bottom:4px">IDP resmî kaynaklar</h3><p class="hint" style="margin-bottom:10px">IELTS'in resmî ortaklarından ücretsiz deneme testleri ve soru türü sayfaları. Telefonda uygulama: <b>IELTS by IDP</b>.</p>
+      ${IDP.map(([n,u,a])=>`<div style="padding:9px 0;border-top:1px solid var(--edge)"><a href="${u}" target="_blank" rel="noopener noreferrer"><b>${E(n)}</b></a><div class="hint">${E(a)}</div></div>`).join("")}</div>`;
   }
 })();
 </script>
