@@ -2,7 +2,7 @@
 <html lang="tr"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="akademi-surum" content="202610160140">
+<meta name="akademi-surum" content="202610181200">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#1B3A5C">
 <link rel="manifest" href="manifest.webmanifest">
@@ -16965,9 +16965,10 @@ input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px color-mix(in srgb,v
       hata_defteri:d.hatalar.map(x=>({tarih:x.tarih,hata:x.hata,dogrusu:x.dogrusu,tur:x.tur,n:x.n||1,kaynak:x.kaynak,son:x.son,due:x.due,asama:x.asama||0})),
       hata_defteri_ozet:oz,
       yazi_gonderimleri:d.yazilar.slice(-30).map(y=>({tarih:y.tarih,saat:y.saat,task:y.task,baslik:y.baslik,soru:y.soru,metin:y.metin,kelime:y.kelime,min_kelime:y.min_kelime,sure_dk:y.dk,hedef_dk:y.hedef_dk,sure_asimi:!!y.sure_asimi})),
+      ielts_tarihleri:{erasmus:(d.tarihler||{}).erasmus||"",ielts:(d.tarihler||{}).ielts||""},
       speaking_oturumlari:d.konusma.slice(-60).map(x=>({tarih:x.tarih,part:x.part,konu:x.konu,sure_sn:x.sure_sn,soru_sayisi:x.soru_sayisi||null}))
     }; };
-  const EK_ANAHTARLAR=["dakika_beceri","dakika_beceri_gunluk","ielts_denemeleri","erasmus_pratik","hata_defteri","hata_defteri_ozet","yazi_gonderimleri","speaking_oturumlari"];
+  const EK_ANAHTARLAR=["ielts_tarihleri","dakika_beceri","dakika_beceri_gunluk","ielts_denemeleri","erasmus_pratik","hata_defteri","hata_defteri_ozet","yazi_gonderimleri","speaking_oturumlari"];
   window.ieltsEkAnahtarlar=EK_ANAHTARLAR;
 
   /* ---------- sayfa iskeleti ---------- */
@@ -16996,13 +16997,46 @@ input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px color-mix(in srgb,v
   }
 
   /* ---------- Özet ---------- */
+  /* haftalık beceri hedefleri (dk) — IELTS Rehberi (16 Ekim 2026) takvim önerisi: Ekim–Ocak ~7 sa, Şubat–Nisan ~7–8 sa, Mayıs ~4–5 sa, Haziran ~8 sa */
+  const DONEMLER=[
+    {ad:"Ekim–Ocak · Erasmus",ay:[10,11,12,1,7,8,9],odak:"gramer, reading, listening, kısa writing",h:{reading:120,kelime_gramer:60,listening:120,writing:90,speaking:30}},
+    {ad:"Şubat–Nisan · IELTS becerileri",ay:[2,3,4],odak:"Task 1/2, Reading stratejileri, speaking kayıtları",h:{reading:110,listening:100,writing:130,speaking:70,kelime_gramer:40}},
+    {ad:"Mayıs · finaller (yükü azalt)",ay:[5],odak:"günlük kısa tekrar",h:{reading:70,listening:60,writing:60,speaking:30,kelime_gramer:50}},
+    {ad:"Haziran · deneme sınavları",ay:[6],odak:"deneme sınavları; sınavdan önceki son hafta hafif",h:{reading:110,listening:100,writing:130,speaking:70,kelime_gramer:70}}];
+  const donem=()=>{ const m=new Date().getMonth()+1; return DONEMLER.find(d=>d.ay.includes(m))||DONEMLER[0]; };
+  const haftaGunleri=()=>{ const d=new Date(), g=(d.getDay()+6)%7; return [...Array(7)].map((_,i)=>addDays(bugun(),i-g)); };   // Pazartesi→Pazar
+  const gunFarki=iso=>Math.round((Date.parse(iso+"T00:00:00")-Date.parse(bugun()+"T00:00:00"))/864e5);
+  function yaziKelimeleri(){ const kel=new Set(); I().yazilar.forEach(y=>(String(y.metin).toLowerCase().match(/[a-z][a-z'-]{2,}/g)||[]).forEach(w=>kel.add(w)));
+    const wl=[...kel].filter(w=>typeof DICT!=="undefined"&&DICT[w]); return {farkli:kel.size,wordLibrary:wl.length,ornek:wl.slice(0,8)}; }
   function tOzet(b){
     flush(); const d=I(), bu=dkOf(d.sn[bugun()]), toplam=Object.values(bu).reduce((a,c)=>a+c,0), maks=Math.max(30,...Object.values(bu));
+    const hg=haftaGunleri(), hs=hg.map(g=>d.sn[g]||{}), hafta={}; BECERI.forEach(([k])=>{ hafta[k]=Math.round(hs.reduce((a,x)=>a+(x[k]||0),0)/60); });
+    const dn=donem(), hedefTop=Object.values(dn.h).reduce((a,c)=>a+c,0), haftaTop=Object.values(hafta).reduce((a,c)=>a+c,0);
     const gunler=[...Array(7)].map((_,i)=>addDays(bugun(),i-6)).reverse(), son=d.denemeler.filter(x=>x.band!=null).sort((a,c)=>a.tarih<c.tarih?1:-1)[0], er=d.erasmus[d.erasmus.length-1];
-    b.innerHTML=`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:4px">Bugün · beceri bazlı dakika</h3>
+    const hf=new Set(hg), yz=d.yazilar.filter(y=>hf.has(y.tarih)), t1=yz.filter(y=>y.task===1).length, t2=yz.filter(y=>y.task===2).length, sp=d.konusma.filter(x=>hf.has(x.tarih)).length, bd=d.denemeler.filter(x=>hf.has(x.tarih)).length;
+    const baslangicVar=d.denemeler.some(x=>x.tur==="Başlangıç"), tr=d.tarihler||{}, kw=yaziKelimeleri();
+    const ritu=(ok,n,hedef,ad)=>`<div class="row" style="gap:8px;margin-bottom:5px"><span style="width:22px;font-size:16px">${ok?"✅":"⬜"}</span><span style="flex:1;font-size:13.5px">${ad}</span><span class="hint">${n}/${hedef}</span></div>`;
+    const sayac=(iso,bos)=>iso?(gunFarki(iso)>=0?`<b>${gunFarki(iso)}</b> gün kaldı · ${iso}`:`geçti · ${iso}`):bos;
+    const kayitIpucu=tr.ielts?(()=>{ const k8=addDays(tr.ielts,-56), k6=addDays(tr.ielts,-42); const g=gunFarki(k8); return g>0?`Kayıt için ayır: <b>${k8}</b> ile <b>${k6}</b> arası (sınavdan 6–8 hafta önce).`:gunFarki(k6)>=0?`<b>Şimdi kayıt zamanı</b> (en geç ${k6}).`:"Kayıt penceresi geçti; kaydın tamam mı?"; })()
+      :(new Date().getMonth()===3?`<b>Nisan:</b> Haziran sınavı için tarihi seç ve kayıt ol (6–8 hafta önce).`:"Haziran ilk yarısı önerilir; kaydı Nisan başında yap.");
+    b.innerHTML=`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:4px">Sınav takvimi</h3>
+      <p class="hint" style="margin-bottom:10px">Hedef: IELTS Academic <b>7.0</b> (her bölümde en az 6.5 hedefle) · Erasmus <b>70+/100</b>, geçme 60. Haziran 2027'de ilk giriş gerçekçi 6.0–6.5; 7.0 ikinci girişte olabilir.</p>
+      <div class="row" style="gap:16px;flex-wrap:wrap;align-items:flex-end">
+        <label>Erasmus sınav tarihi<br><input type="date" id="tkEr" value="${E(tr.erasmus||"")}" style="width:auto"></label>
+        <label>IELTS sınav tarihi<br><input type="date" id="tkIe" value="${E(tr.ielts||"")}" style="width:auto"></label><button class="btn ghost sm" type="button" id="tkKaydet">Kaydet</button></div>
+      <p style="margin-top:10px;font-size:13.5px"><b>Erasmus (Ocak 2027):</b> ${sayac(tr.erasmus,"tarih henüz belli değil — ilan edilince buraya gir")}<br><b>IELTS:</b> ${sayac(tr.ielts,"tarih seçilmedi (hedef: Haziran 2027 ilk yarısı)")}<br><span class="hint">${kayitIpucu}</span></p></div>
+      <div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:4px">Bu hafta · ${E(dn.ad)}</h3><p class="hint" style="margin-bottom:10px">Odak: ${E(dn.odak)}. Hedef toplam ≈ ${Math.round(hedefTop/6)/10} saat; bu hafta <b>${haftaTop} dk</b>. Saat doldurmak değil, hangi beceriye ne kadar gittiğine bak.</p>
+        ${BECERI.map(([k,n])=>{ const h=dn.h[k], p=Math.min(100,Math.round(100*hafta[k]/h)); return `<div class="row" style="margin-bottom:6px"><span style="width:120px;font-size:13px">${n}</span><div class="bar" style="flex:1;margin:0"><i style="width:${p}%;${p>=100?"background:var(--green)":""}"></i></div><span class="hint" style="width:90px;text-align:right">${hafta[k]} / ${h} dk</span></div>`; }).join("")}
+        <h4 style="margin:14px 0 8px">Haftalık ritüel</h4>
+        ${ritu(t2>=1,t2,1,"Writing Task 2 (40 dk)")}${ritu(t1>=1,t1,1,"Writing Task 1 (20 dk)")}${ritu(sp>=3,sp,3,"Speaking oturumu")}
+        ${ritu(baslangicVar||bd>=1,baslangicVar?"✓":bd,baslangicVar?"✓":1,baslangicVar?"Başlangıç denemesi yapıldı":"Deneme (ilk hafta: başlangıç denemesi — L+R tam, Writing Task 2, 3 speaking sorusu)")}${ritu(kuyruk().length===0,kuyruk().length,0,"Hata defteri kuyruğu boş")}
+        <p class="hint" style="margin-top:8px">Şubat'tan sonra her 2 haftada bir tam deneme. Ritüel hafta Pazartesi başlar.</p></div>
+      <div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:4px">Bugün · beceri bazlı dakika</h3>
       <p class="hint" style="margin-bottom:10px">Sayfada etkin geçirdiğin süre (sekme açık ve hareket var) beceriye göre sayılır. Toplam <b>${toplam} dk</b>.</p>
-      ${BECERI.map(([k,n])=>`<div class="row" style="margin-bottom:6px"><span style="width:120px;font-size:13px">${n}</span><div class="bar" style="flex:1;margin:0"><i style="width:${Math.round(100*bu[k]/maks)}%"></i></div><span class="hint" style="width:54px;text-align:right">${bu[k]} dk</span></div>`).join("")}
-      <p class="hint" style="margin-top:8px">Listening, Reading, Writing, Speaking ve Kelime-Gramer sayfalarında ve bu merkezin Writing/Speaking/Erasmus/Hata sekmelerinde sayılır.</p></div>
+      ${BECERI.map(([k,n])=>`<div class="row" style="margin-bottom:6px"><span style="width:120px;font-size:13px">${n}</span><div class="bar" style="flex:1;margin:0"><i style="width:${Math.round(100*bu[k]/maks)}%"></i></div><span class="hint" style="width:54px;text-align:right">${bu[k]} dk</span></div>`).join("")}</div>
+      <div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:6px">Yazıda kullandığın kelimeler</h3>
+        <p style="font-size:13.5px;margin-bottom:4px">Yazılarında <b>${kw.farkli}</b> farklı kelime, bunların <b>${kw.wordLibrary}</b> tanesi Word Library'de kayıtlı.</p>
+        <p class="hint">Kelime sayısını kovalamak yerine, öğrendiğin akademik kelimeleri yazıda kullanmak daha değerli. Çoğul/çekim biçimleri ayrı sayılır, rakam yaklaşıktır.</p></div>
       <div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:8px">Son 7 gün (dk)</h3><div class="scroll"><table><tr><th>Gün</th>${BECERI.map(([k,n])=>`<th>${n.split("-")[0]}</th>`).join("")}<th>Toplam</th></tr>
         ${gunler.map(g=>{ const x=dkOf(d.sn[g]); return `<tr><td>${g.slice(5)}</td>${BECERI.map(([k])=>`<td>${x[k]||"·"}</td>`).join("")}<td><b>${Object.values(x).reduce((a,c)=>a+c,0)}</b></td></tr>`; }).join("")}</table></div></div>
       <div class="tiles" style="margin-bottom:16px">
@@ -17010,6 +17044,7 @@ input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px color-mix(in srgb,v
         <div class="tile"><div class="k">Erasmus pratik</div><div class="v">${er?er.puan:"—"}</div><div class="m">${er?(er.puan>=60?"geçti":"geçemedi")+" · geçme 60":"50 soru · geçme 60"}</div></div>
         <div class="tile"><div class="k">Hata kuyruğu</div><div class="v">${kuyruk().length}</div><div class="m">${d.hatalar.length} kayıt</div></div>
         <div class="tile"><div class="k">Writing / Speaking</div><div class="v">${d.yazilar.length} / ${d.konusma.length}</div><div class="m">kayıt</div></div></div>`;
+    b.querySelector("#tkKaydet").onclick=()=>{ d.tarihler={erasmus:b.querySelector("#tkEr").value||"",ielts:b.querySelector("#tkIe").value||""}; saveState(); toast("Sınav tarihleri kaydedildi",{kind:"ok"}); sayfaCiz(); };
   }
 
   /* ---------- Denemeler ---------- */
@@ -17023,19 +17058,24 @@ input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px color-mix(in srgb,v
       <div class="row" style="gap:12px;flex-wrap:wrap;align-items:flex-end">
         <label>Tarih<br><input type="date" id="dnT" value="${bugun()}" style="width:auto"></label>
         <label>Tür<br><select id="dnTur" style="width:auto">${DENEME_TURLERI.map(t=>`<option>${t}</option>`).join("")}</select></label>
-        <label>Listening<br>${puanSec("dnL")}</label><label>Reading<br>${puanSec("dnR")}</label><label>Writing<br>${puanSec("dnW")}</label><label>Speaking<br>${puanSec("dnS")}</label>
+        <label>Listening<br>${puanSec("dnL")} <input type="number" id="dnLham" min="0" max="40" placeholder="doğru /40" title="Ham doğru sayısı (yaklaşık band'a çevrilir)" style="width:84px"></label><label>Reading<br>${puanSec("dnR")} <input type="number" id="dnRham" min="0" max="40" placeholder="doğru /40" title="Ham doğru sayısı (yaklaşık band'a çevrilir)" style="width:84px"></label><label>Writing<br>${puanSec("dnW")}</label><label>Speaking<br>${puanSec("dnS")}</label>
         <label id="dnPuanK" style="display:none">Erasmus puanı (0-100)<br><input type="number" id="dnPuan" min="0" max="100" style="width:90px"></label></div>
       <div class="row" style="gap:12px;flex-wrap:wrap;margin-top:10px"><label style="flex:1;min-width:220px">Ana hata<br><input type="text" id="dnHata" placeholder="örn. Task 2'de paragraf geçişleri zayıf"></label>
         <label style="flex:1;min-width:220px">Kaynak / not<br><input type="text" id="dnNot" placeholder="örn. IDP free test 1"></label></div>
       <p class="hint" id="dnBand" style="margin:10px 0">Dört puanı da girersen toplam band otomatik hesaplanır (IELTS yuvarlama kuralı).</p>
+      <p class="hint" style="margin-bottom:10px">Listening/Reading için "doğru /40" yazarsan yaklaşık band seçilir (40 sorudan ~30 doğru ≈ 7.0). Hedef: her bölümde en az 6.5 (listede 6.5 altı kırmızı, 7.0 ve üstü yeşil).</p>
       <div class="row">${btn("dnKaydet","Kaydet")}</div></div>
       ${svg?`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:6px">Band gelişimi</h3>${svg}</div>`:""}
       <div class="card"><h3 style="margin-bottom:8px">Denemeler (${liste.length})</h3>${liste.length?`<div class="scroll"><table><tr><th>Tarih</th><th>Tür</th><th>L</th><th>R</th><th>W</th><th>S</th><th>Band</th><th>Ana hata</th><th></th></tr>
-        ${liste.map(x=>`<tr><td>${x.tarih}</td><td>${E(x.tur)}</td><td>${x.listening??"·"}</td><td>${x.reading??"·"}</td><td>${x.writing??"·"}</td><td>${x.speaking??"·"}</td><td><b>${x.band!=null?x.band.toFixed(1):(x.puan!=null?x.puan+"/100":"·")}</b></td><td class="hint">${E(x.ana_hata||"")}</td><td><button class="btn ghost sm" data-del="${x.id}" type="button" aria-label="Sil">✕</button></td></tr>`).join("")}</table></div>`:`<p class="hint">Henüz deneme yok. Başlangıç denemeni (Listening + Reading tam, Writing Task 2, 3 speaking sorusu) yapınca buraya gir.</p>`}</div>`;
+        ${liste.map(x=>`<tr><td>${x.tarih}</td><td>${E(x.tur)}</td>${["listening","reading","writing","speaking"].map(k=>`<td style="${x[k]==null?"":x[k]<6.5?"color:var(--red)":x[k]>=7?"color:var(--green);font-weight:600":""}">${x[k]??"·"}</td>`).join("")}<td><b>${x.band!=null?x.band.toFixed(1):(x.puan!=null?x.puan+"/100":"·")}</b></td><td class="hint">${E(x.ana_hata||"")}</td><td><button class="btn ghost sm" data-del="${x.id}" type="button" aria-label="Sil">✕</button></td></tr>`).join("")}</table></div>`:`<p class="hint">Henüz deneme yok. Başlangıç denemeni (Listening + Reading tam, Writing Task 2, 3 speaking sorusu) yapınca buraya gir.</p>`}</div>`;
     const q=s=>b.querySelector(s), al=()=>["#dnL","#dnR","#dnW","#dnS"].map(s=>q(s).value);
     const guncelle=()=>{ q("#dnPuanK").style.display=q("#dnTur").value==="Erasmus pratik"?"":"none"; const bd=bandHesap(...al());
       q("#dnBand").textContent=bd!=null?`Toplam band: ${bd.toFixed(1)}`:"Dört puanı da girersen toplam band otomatik hesaplanır (IELTS yuvarlama kuralı)."; };
     ["#dnL","#dnR","#dnW","#dnS","#dnTur"].forEach(s=>q(s).onchange=guncelle); guncelle();
+    /* ham doğru sayısı → yaklaşık band (Academic; resmî tablo her sınavda biraz değişir) */
+    const HAM={L:[[39,9],[37,8.5],[35,8],[32,7.5],[30,7],[26,6.5],[23,6],[18,5.5],[16,5],[13,4.5],[10,4]],R:[[39,9],[37,8.5],[35,8],[33,7.5],[30,7],[27,6.5],[23,6],[19,5.5],[15,5],[13,4.5],[10,4]]};
+    const hamBand=(t,n)=>{ const x=HAM[t].find(([e])=>n>=e); return x?x[1]:""; };
+    [["#dnLham","#dnL","L"],["#dnRham","#dnR","R"]].forEach(([h,sel,t])=>{ q(h).oninput=()=>{ const v=q(h).value; if(v===""){ return; } const bd=hamBand(t,Math.min(40,Math.max(0,+v))); q(sel).value=bd===""?"":String(bd); guncelle(); }; });
     q("#dnKaydet").onclick=()=>{ const [l,r,w,s]=al(), tur=q("#dnTur").value, p=q("#dnPuan").value;
       if(l===""&&r===""&&w===""&&s===""&&p===""){ toast("En az bir puan gir",{kind:"err"}); return; }
       const n=v=>v===""?null:+v;
@@ -17249,6 +17289,8 @@ input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px color-mix(in srgb,v
   /* ---------- Kaynaklar ---------- */
   function tKaynak(b){
     b.innerHTML=`<div class="card"><h3 style="margin-bottom:4px">IDP resmî kaynaklar</h3><p class="hint" style="margin-bottom:10px">IELTS'in resmî ortaklarından ücretsiz deneme testleri ve soru türü sayfaları. Telefonda uygulama: <b>IELTS by IDP</b>.</p>
+      <div style="padding:9px 0;border-top:1px solid var(--edge)"><a href="https://takeielts.britishcouncil.org/take-ielts/prepare" target="_blank" rel="noopener noreferrer"><b>British Council · IELTS hazırlık ve ücretsiz örnek testler</b></a><div class="hint">Ücretsiz örnek testler (bağlantı tarayıcıda açılır; sayfa değişirse sitede "prepare" bölümüne bak).</div></div>
+      <div style="padding:9px 0;border-top:1px solid var(--edge)"><b>Cambridge IELTS deneme kitapları (seri 14 ve sonrası)</b><div class="hint">Resmî deneme setleri; güncel kitap numarasını teyit et. Başlangıç denemeni ve Şubat'tan sonraki tam denemeleri bunlardan yap, sonucu Denemeler sekmesine gir.</div></div>
       ${IDP.map(([n,u,a])=>`<div style="padding:9px 0;border-top:1px solid var(--edge)"><a href="${u}" target="_blank" rel="noopener noreferrer"><b>${E(n)}</b></a><div class="hint">${E(a)}</div></div>`).join("")}</div>`;
   }
 })();
